@@ -41,6 +41,11 @@ import tensorflow as tf
 from datasets import load_dataset
 from sklearn.model_selection import train_test_split
 
+import debugpy
+debugpy.listen(5678)
+debugpy.wait_for_client()
+debugpy.breakpoint()
+
 import transformers
 from transformers import (
     CONFIG_MAPPING,
