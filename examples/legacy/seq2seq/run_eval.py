@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# notion note:
+# https://www.notion.so/xiaofengwu/run_eval-py-seq2seq-eval-ru-en-en-ru-ae02c0cfd64b413195ce5527771008a2?pvs=4
+
 import argparse
 import datetime
 import json
