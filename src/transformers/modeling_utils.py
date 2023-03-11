@@ -27,6 +27,8 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import pysnooper
+
 import torch
 from packaging import version
 from torch import Tensor, nn
@@ -2057,6 +2059,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         Currently, it can't handle deepspeed ZeRO stage 3 and ignores loading errors
 
         """
+        # with pysnooper.snoop(f'/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/modeling_utils.log'):
         config = kwargs.pop("config", None)
         state_dict = kwargs.pop("state_dict", None)
         cache_dir = kwargs.pop("cache_dir", None)

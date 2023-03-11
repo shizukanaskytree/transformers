@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from . import (
+    brand_new_bert,
     albert,
     align,
     altclip,
