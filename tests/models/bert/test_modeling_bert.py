@@ -25,6 +25,9 @@ from ...test_configuration_common import ConfigTester
 from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor, random_attention_mask
 from ...test_pipeline_mixin import PipelineTesterMixin
 
+import sys
+import pysnooper
+# import debugpy; debugpy.listen(5678); print("Waiting for debugger attach"); debugpy.wait_for_client();
 
 if is_torch_available():
     import torch
@@ -70,6 +73,7 @@ class BertModelTester:
         num_choices=4,
         scope=None,
     ):
+        # with pysnooper.snoop("./log_init.txt"):
         self.parent = parent
         self.batch_size = batch_size
         self.seq_length = seq_length
@@ -94,6 +98,7 @@ class BertModelTester:
         self.scope = scope
 
     def prepare_config_and_inputs(self):
+        # with pysnooper.snoop("./log_prepare_config_and_inputs.txt"):
         input_ids = ids_tensor([self.batch_size, self.seq_length], self.vocab_size)
 
         input_mask = None
@@ -116,10 +121,12 @@ class BertModelTester:
 
         return config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
 
+    # @pysnooper.snoop("./log_get_config.txt", max_variable_length=None)
     def get_config(self):
         """
         Returns a tiny configuration by default.
         """
+        # with pysnooper.snoop("./log_get_config.txt"):
         return BertConfig(
             vocab_size=self.vocab_size,
             hidden_size=self.hidden_size,
@@ -165,10 +172,24 @@ class BertModelTester:
     def create_and_check_model(
         self, config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
     ):
+        # import torch.onnx
+
         model = BertModel(config=config)
         model.to(torch_device)
         model.eval()
         result = model(input_ids, attention_mask=input_mask, token_type_ids=token_type_ids)
+
+        # # export the model to ONNX format
+        # input_names = ["input_ids", "attention_mask", "token_type_ids"]
+        # output_names = ["output"]
+        # dynamic_axes = {"input_ids": {0: "batch_size", 1: "sequence_length"},
+        #                 "attention_mask": {0: "batch_size", 1: "sequence_length"},
+        #                 "token_type_ids": {0: "batch_size", 1: "sequence_length"},
+        #                 "output": {0: "batch_size", 1: "sequence_length"}}
+        # onnx_filename = "bert.onnx"
+        # torch.onnx.export(model, (input_ids, input_mask, token_type_ids), onnx_filename,
+        #                 input_names=input_names, output_names=output_names, dynamic_axes=dynamic_axes)
+
         result = model(input_ids, token_type_ids=token_type_ids)
         result = model(input_ids)
         self.parent.assertEqual(result.last_hidden_state.shape, (self.batch_size, self.seq_length, self.hidden_size))

@@ -718,4 +718,5 @@ def main():
 
 
 if __name__ == "__main__":
+    import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); print("Waiting for debugger to attach..."); debugpy.breakpoint()
     main()

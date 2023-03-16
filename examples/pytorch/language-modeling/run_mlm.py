@@ -51,6 +51,9 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
+# from torch.utils.tensorboard import SummaryWriter
+# Create a SummaryWriter object
+# writer = SummaryWriter() # bug bug bug
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.27.0.dev0")
@@ -573,6 +576,10 @@ def main():
         mlm_probability=data_args.mlm_probability,
         pad_to_multiple_of=8 if pad_to_multiple_of_8 else None,
     )
+
+    # Log the model graph, does not work to show graph!!!
+    # input_to_model: input_to_model (torch.Tensor or list of torch.Tensor): A variable or a tuple of variables to be fed.
+    # writer.add_graph(model, input_to_model=)
 
     # Initialize our Trainer
     trainer = Trainer(
