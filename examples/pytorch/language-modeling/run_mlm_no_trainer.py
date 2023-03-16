@@ -22,6 +22,8 @@ https://huggingface.co/models?filter=fill-mask
 """
 # You can also adapt this script on your own mlm task. Pointers for this are left as comments.
 
+# notion note: https://www.notion.so/xiaofengwu/run_mlm_no_trainer-py-examples-pytorch-language-modeling-run_mlm_no_trainer-py-5a77a31f2e464570a31a9ad68e33d17a?pvs=4
+
 import argparse
 import json
 import logging
@@ -718,5 +720,5 @@ def main():
 
 
 if __name__ == "__main__":
-    import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); print("Waiting for debugger to attach..."); debugpy.breakpoint()
+    # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); print("Waiting for debugger to attach..."); debugpy.breakpoint()
     main()
