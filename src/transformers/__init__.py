@@ -122,7 +122,6 @@ _import_structure = {
     ],
     "models": [],
     # Models
-    "models.brand_new_bert": ["BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP", "BrandNewBertConfig", "BrandNewBertTokenizer"],
     "models.albert": ["ALBERT_PRETRAINED_CONFIG_ARCHIVE_MAP", "AlbertConfig"],
     "models.align": [
         "ALIGN_PRETRAINED_CONFIG_ARCHIVE_MAP",
@@ -199,6 +198,11 @@ _import_structure = {
     ],
     "models.bloom": ["BLOOM_PRETRAINED_CONFIG_ARCHIVE_MAP", "BloomConfig"],
     "models.bort": [],
+    "models.brand_new_bert": [
+        "BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP",
+        "BrandNewBertConfig",
+        "BrandNewBertTokenizer",
+    ],
     "models.bridgetower": [
         "BRIDGETOWER_PRETRAINED_CONFIG_ARCHIVE_MAP",
         "BridgeTowerConfig",
@@ -698,7 +702,6 @@ except OptionalDependencyNotAvailable:
     ]
 else:
     # Fast tokenizers structure
-    _import_structure["models.brand_new_bert"].append("BrandNewBertTokenizerFast")
     _import_structure["models.albert"].append("AlbertTokenizerFast")
     _import_structure["models.bart"].append("BartTokenizerFast")
     _import_structure["models.barthez"].append("BarthezTokenizerFast")
@@ -707,6 +710,7 @@ else:
     _import_structure["models.blenderbot"].append("BlenderbotTokenizerFast")
     _import_structure["models.blenderbot_small"].append("BlenderbotSmallTokenizerFast")
     _import_structure["models.bloom"].append("BloomTokenizerFast")
+    _import_structure["models.brand_new_bert"].append("BrandNewBertTokenizerFast")
     _import_structure["models.camembert"].append("CamembertTokenizerFast")
     _import_structure["models.clip"].append("CLIPTokenizerFast")
     _import_structure["models.codegen"].append("CodeGenTokenizerFast")
@@ -935,21 +939,6 @@ else:
 
     # PyTorch models structure
 
-    _import_structure["models.brand_new_bert"].extend(
-        [
-            "BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST",
-            "BrandNewBertForMaskedLM",
-            "BrandNewBertForCausalLM",
-            "BrandNewBertForMultipleChoice",
-            "BrandNewBertForQuestionAnswering",
-            "BrandNewBertForSequenceClassification",
-            "BrandNewBertForTokenClassification",
-            "BrandNewBertLayer",
-            "BrandNewBertModel",
-            "BrandNewBertPreTrainedModel",
-            "load_tf_weights_in_brand_new_bert",
-        ]
-    )
     _import_structure["models.albert"].extend(
         [
             "ALBERT_PRETRAINED_MODEL_ARCHIVE_LIST",
@@ -1198,6 +1187,21 @@ else:
             "BloomForTokenClassification",
             "BloomModel",
             "BloomPreTrainedModel",
+        ]
+    )
+    _import_structure["models.brand_new_bert"].extend(
+        [
+            "BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST",
+            "BrandNewBertForCausalLM",
+            "BrandNewBertForMaskedLM",
+            "BrandNewBertForMultipleChoice",
+            "BrandNewBertForQuestionAnswering",
+            "BrandNewBertForSequenceClassification",
+            "BrandNewBertForTokenClassification",
+            "BrandNewBertLayer",
+            "BrandNewBertModel",
+            "BrandNewBertPreTrainedModel",
+            "load_tf_weights_in_brand_new_bert",
         ]
     )
     _import_structure["models.bridgetower"].extend(
@@ -3757,7 +3761,6 @@ if TYPE_CHECKING:
         load_tf2_weights_in_pytorch_model,
     )
     from .models.albert import ALBERT_PRETRAINED_CONFIG_ARCHIVE_MAP, AlbertConfig
-    from .models.brand_new_bert import BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, BrandNewBertConfig, BrandNewBertTokenizer
     from .models.align import (
         ALIGN_PRETRAINED_CONFIG_ARCHIVE_MAP,
         AlignConfig,
@@ -3827,6 +3830,11 @@ if TYPE_CHECKING:
         Blip2VisionConfig,
     )
     from .models.bloom import BLOOM_PRETRAINED_CONFIG_ARCHIVE_MAP, BloomConfig
+    from .models.brand_new_bert import (
+        BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
+        BrandNewBertConfig,
+        BrandNewBertTokenizer,
+    )
     from .models.bridgetower import (
         BRIDGETOWER_PRETRAINED_CONFIG_ARCHIVE_MAP,
         BridgeTowerConfig,
@@ -4290,7 +4298,6 @@ if TYPE_CHECKING:
         from .utils.dummy_tokenizers_objects import *
     else:
         # Fast tokenizers imports
-        from .models.brand_new_bert import BrandNewBertTokenizerFast
         from .models.albert import AlbertTokenizerFast
         from .models.bart import BartTokenizerFast
         from .models.barthez import BarthezTokenizerFast
@@ -4299,6 +4306,7 @@ if TYPE_CHECKING:
         from .models.blenderbot import BlenderbotTokenizerFast
         from .models.blenderbot_small import BlenderbotSmallTokenizerFast
         from .models.bloom import BloomTokenizerFast
+        from .models.brand_new_bert import BrandNewBertTokenizerFast
         from .models.camembert import CamembertTokenizerFast
         from .models.clip import CLIPTokenizerFast
         from .models.codegen import CodeGenTokenizerFast
@@ -4485,22 +4493,6 @@ if TYPE_CHECKING:
             top_k_top_p_filtering,
         )
         from .modeling_utils import PreTrainedModel
-
-        # PyTorch model imports
-
-        from .models.brand_new_bert import (
-            BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST,
-            BrandNewBertForMaskedLM,
-            BrandNewBertForCausalLM,
-            BrandNewBertForMultipleChoice,
-            BrandNewBertForQuestionAnswering,
-            BrandNewBertForSequenceClassification,
-            BrandNewBertForTokenClassification,
-            BrandNewBertLayer,
-            BrandNewBertModel,
-            BrandNewBertPreTrainedModel,
-            load_tf_weights_in_brand_new_bert,
-        )
         from .models.albert import (
             ALBERT_PRETRAINED_MODEL_ARCHIVE_LIST,
             AlbertForMaskedLM,
@@ -4714,6 +4706,21 @@ if TYPE_CHECKING:
             BloomForTokenClassification,
             BloomModel,
             BloomPreTrainedModel,
+        )
+
+        # PyTorch model imports
+        from .models.brand_new_bert import (
+            BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST,
+            BrandNewBertForCausalLM,
+            BrandNewBertForMaskedLM,
+            BrandNewBertForMultipleChoice,
+            BrandNewBertForQuestionAnswering,
+            BrandNewBertForSequenceClassification,
+            BrandNewBertForTokenClassification,
+            BrandNewBertLayer,
+            BrandNewBertModel,
+            BrandNewBertPreTrainedModel,
+            load_tf_weights_in_brand_new_bert,
         )
         from .models.bridgetower import (
             BRIDGETOWER_PRETRAINED_MODEL_ARCHIVE_LIST,

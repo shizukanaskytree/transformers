@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from . import (
-    brand_new_bert,
     albert,
     align,
     altclip,
@@ -37,6 +36,7 @@ from . import (
     blip_2,
     bloom,
     bort,
+    brand_new_bert,
     bridgetower,
     byt5,
     camembert,

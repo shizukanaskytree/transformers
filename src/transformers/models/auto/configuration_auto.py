@@ -29,7 +29,6 @@ logger = logging.get_logger(__name__)
 CONFIG_MAPPING_NAMES = OrderedDict(
     [
         # Add configs here
-        ("brand_new_bert", "BrandNewBertConfig"),
         ("albert", "AlbertConfig"),
         ("align", "AlignConfig"),
         ("altclip", "AltCLIPConfig"),
@@ -47,6 +46,7 @@ CONFIG_MAPPING_NAMES = OrderedDict(
         ("blip", "BlipConfig"),
         ("blip-2", "Blip2Config"),
         ("bloom", "BloomConfig"),
+        ("brand_new_bert", "BrandNewBertConfig"),
         ("bridgetower", "BridgeTowerConfig"),
         ("camembert", "CamembertConfig"),
         ("canine", "CanineConfig"),
@@ -210,7 +210,6 @@ CONFIG_MAPPING_NAMES = OrderedDict(
 CONFIG_ARCHIVE_MAP_MAPPING_NAMES = OrderedDict(
     [
         # Add archive maps here)
-        ("brand_new_bert", "BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("albert", "ALBERT_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("align", "ALIGN_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("altclip", "ALTCLIP_PRETRAINED_CONFIG_ARCHIVE_MAP"),
@@ -227,6 +226,7 @@ CONFIG_ARCHIVE_MAP_MAPPING_NAMES = OrderedDict(
         ("blip", "BLIP_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("blip-2", "BLIP_2_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("bloom", "BLOOM_PRETRAINED_CONFIG_ARCHIVE_MAP"),
+        ("brand_new_bert", "BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("bridgetower", "BRIDGETOWER_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("camembert", "CAMEMBERT_PRETRAINED_CONFIG_ARCHIVE_MAP"),
         ("canine", "CANINE_PRETRAINED_CONFIG_ARCHIVE_MAP"),
@@ -373,7 +373,6 @@ CONFIG_ARCHIVE_MAP_MAPPING_NAMES = OrderedDict(
 MODEL_NAMES_MAPPING = OrderedDict(
     [
         # Add full (and cased) model names here
-        ("brand_new_bert", "BrandNewBert"),
         ("albert", "ALBERT"),
         ("align", "ALIGN"),
         ("altclip", "AltCLIP"),
@@ -396,6 +395,7 @@ MODEL_NAMES_MAPPING = OrderedDict(
         ("blip-2", "BLIP-2"),
         ("bloom", "BLOOM"),
         ("bort", "BORT"),
+        ("brand_new_bert", "BrandNewBert"),
         ("bridgetower", "BridgeTower"),
         ("byt5", "ByT5"),
         ("camembert", "CamemBERT"),

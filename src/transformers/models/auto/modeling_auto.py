@@ -28,7 +28,6 @@ logger = logging.get_logger(__name__)
 MODEL_MAPPING_NAMES = OrderedDict(
     [
         # Base model mapping
-        ("brand_new_bert", "BrandNewBertModel"),
         ("albert", "AlbertModel"),
         ("align", "AlignModel"),
         ("altclip", "AltCLIPModel"),
@@ -46,6 +45,7 @@ MODEL_MAPPING_NAMES = OrderedDict(
         ("blip", "BlipModel"),
         ("blip-2", "Blip2Model"),
         ("bloom", "BloomModel"),
+        ("brand_new_bert", "BrandNewBertModel"),
         ("bridgetower", "BridgeTowerModel"),
         ("camembert", "CamembertModel"),
         ("canine", "CanineModel"),
@@ -262,7 +262,6 @@ MODEL_FOR_PRETRAINING_MAPPING_NAMES = OrderedDict(
 MODEL_WITH_LM_HEAD_MAPPING_NAMES = OrderedDict(
     [
         # Model with LM heads mapping
-("brand_new_bert", "BrandNewBertForMaskedLM"),
         ("albert", "AlbertForMaskedLM"),
         ("bart", "BartForConditionalGeneration"),
         ("bert", "BertForMaskedLM"),
@@ -270,6 +269,7 @@ MODEL_WITH_LM_HEAD_MAPPING_NAMES = OrderedDict(
         ("bigbird_pegasus", "BigBirdPegasusForConditionalGeneration"),
         ("blenderbot-small", "BlenderbotSmallForConditionalGeneration"),
         ("bloom", "BloomForCausalLM"),
+        ("brand_new_bert", "BrandNewBertForMaskedLM"),
         ("camembert", "CamembertForMaskedLM"),
         ("codegen", "CodeGenForCausalLM"),
         ("convbert", "ConvBertForMaskedLM"),
@@ -338,7 +338,6 @@ MODEL_WITH_LM_HEAD_MAPPING_NAMES = OrderedDict(
 MODEL_FOR_CAUSAL_LM_MAPPING_NAMES = OrderedDict(
     [
         # Model for Causal LM mapping
-        ("brand_new_bert", "BrandNewBertForCausalLM"),
         ("bart", "BartForCausalLM"),
         ("bert", "BertLMHeadModel"),
         ("bert-generation", "BertGenerationDecoder"),
@@ -348,6 +347,7 @@ MODEL_FOR_CAUSAL_LM_MAPPING_NAMES = OrderedDict(
         ("blenderbot", "BlenderbotForCausalLM"),
         ("blenderbot-small", "BlenderbotSmallForCausalLM"),
         ("bloom", "BloomForCausalLM"),
+        ("brand_new_bert", "BrandNewBertForCausalLM"),
         ("camembert", "CamembertForCausalLM"),
         ("codegen", "CodeGenForCausalLM"),
         ("ctrl", "CTRLLMHeadModel"),
@@ -509,11 +509,11 @@ MODEL_FOR_VISION_2_SEQ_MAPPING_NAMES = OrderedDict(
 MODEL_FOR_MASKED_LM_MAPPING_NAMES = OrderedDict(
     [
         # Model for Masked LM mapping
-("brand_new_bert", "BrandNewBertForMaskedLM"),
         ("albert", "AlbertForMaskedLM"),
         ("bart", "BartForConditionalGeneration"),
         ("bert", "BertForMaskedLM"),
         ("big_bird", "BigBirdForMaskedLM"),
+        ("brand_new_bert", "BrandNewBertForMaskedLM"),
         ("camembert", "CamembertForMaskedLM"),
         ("convbert", "ConvBertForMaskedLM"),
         ("data2vec-text", "Data2VecTextForMaskedLM"),
@@ -621,13 +621,13 @@ MODEL_FOR_SPEECH_SEQ_2_SEQ_MAPPING_NAMES = OrderedDict(
 MODEL_FOR_SEQUENCE_CLASSIFICATION_MAPPING_NAMES = OrderedDict(
     [
         # Model for Sequence Classification mapping
-        ("brand_new_bert", "BrandNewBertForSequenceClassification"),
         ("albert", "AlbertForSequenceClassification"),
         ("bart", "BartForSequenceClassification"),
         ("bert", "BertForSequenceClassification"),
         ("big_bird", "BigBirdForSequenceClassification"),
         ("bigbird_pegasus", "BigBirdPegasusForSequenceClassification"),
         ("bloom", "BloomForSequenceClassification"),
+        ("brand_new_bert", "BrandNewBertForSequenceClassification"),
         ("camembert", "CamembertForSequenceClassification"),
         ("canine", "CanineForSequenceClassification"),
         ("convbert", "ConvBertForSequenceClassification"),
@@ -689,13 +689,13 @@ MODEL_FOR_SEQUENCE_CLASSIFICATION_MAPPING_NAMES = OrderedDict(
 MODEL_FOR_QUESTION_ANSWERING_MAPPING_NAMES = OrderedDict(
     [
         # Model for Question Answering mapping
-        ("brand_new_bert", "BrandNewBertForQuestionAnswering"),
         ("albert", "AlbertForQuestionAnswering"),
         ("bart", "BartForQuestionAnswering"),
         ("bert", "BertForQuestionAnswering"),
         ("big_bird", "BigBirdForQuestionAnswering"),
         ("bigbird_pegasus", "BigBirdPegasusForQuestionAnswering"),
         ("bloom", "BloomForQuestionAnswering"),
+        ("brand_new_bert", "BrandNewBertForQuestionAnswering"),
         ("camembert", "CamembertForQuestionAnswering"),
         ("canine", "CanineForQuestionAnswering"),
         ("convbert", "ConvBertForQuestionAnswering"),
@@ -769,11 +769,11 @@ MODEL_FOR_DOCUMENT_QUESTION_ANSWERING_MAPPING_NAMES = OrderedDict(
 MODEL_FOR_TOKEN_CLASSIFICATION_MAPPING_NAMES = OrderedDict(
     [
         # Model for Token Classification mapping
-("brand_new_bert", "BrandNewBertForTokenClassification"),
         ("albert", "AlbertForTokenClassification"),
         ("bert", "BertForTokenClassification"),
         ("big_bird", "BigBirdForTokenClassification"),
         ("bloom", "BloomForTokenClassification"),
+        ("brand_new_bert", "BrandNewBertForTokenClassification"),
         ("camembert", "CamembertForTokenClassification"),
         ("canine", "CanineForTokenClassification"),
         ("convbert", "ConvBertForTokenClassification"),
@@ -822,10 +822,10 @@ MODEL_FOR_TOKEN_CLASSIFICATION_MAPPING_NAMES = OrderedDict(
 MODEL_FOR_MULTIPLE_CHOICE_MAPPING_NAMES = OrderedDict(
     [
         # Model for Multiple Choice mapping
-("brand_new_bert", "BrandNewBertForMultipleChoice"),
         ("albert", "AlbertForMultipleChoice"),
         ("bert", "BertForMultipleChoice"),
         ("big_bird", "BigBirdForMultipleChoice"),
+        ("brand_new_bert", "BrandNewBertForMultipleChoice"),
         ("camembert", "CamembertForMultipleChoice"),
         ("canine", "CanineForMultipleChoice"),
         ("convbert", "ConvBertForMultipleChoice"),

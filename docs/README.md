@@ -16,7 +16,7 @@ limitations under the License.
 
 # Generating the documentation
 
-To generate the documentation, you first have to build it. Several packages are necessary to build the doc, 
+To generate the documentation, you first have to build it. Several packages are necessary to build the doc,
 you can install them with the following command, at the root of the code repository:
 
 ```bash
@@ -39,7 +39,7 @@ check how they look before committing for instance). You don't have to commit th
 
 ## Building the documentation
 
-Once you have setup the `doc-builder` and additional packages, you can generate the documentation by 
+Once you have setup the `doc-builder` and additional packages, you can generate the documentation by
 typing the following command:
 
 ```bash
@@ -194,7 +194,7 @@ Values that should be put in `code` should either be surrounded by backticks: \`
 and objects like True, None, or any strings should usually be put in `code`.
 
 When mentioning a class, function, or method, it is recommended to use our syntax for internal links so that our tool
-adds a link to its documentation with this syntax: \[\`XXXClass\`\] or \[\`function\`\]. This requires the class or 
+adds a link to its documentation with this syntax: \[\`XXXClass\`\] or \[\`function\`\]. This requires the class or
 function to be in the main package.
 
 If you want to create a link to some internal class or function, you need to
@@ -312,10 +312,10 @@ easily.
 
 # Testing documentation examples
 
-Good documentation often comes with an example of how a specific function or class should be used. 
+Good documentation often comes with an example of how a specific function or class should be used.
 Each model class should contain at least one example showcasing
-how to use this model class in inference. *E.g.* the class [Wav2Vec2ForCTC](https://huggingface.co/docs/transformers/model_doc/wav2vec2#transformers.Wav2Vec2ForCTC) 
-includes an example of how to transcribe speech to text in the 
+how to use this model class in inference. *E.g.* the class [Wav2Vec2ForCTC](https://huggingface.co/docs/transformers/model_doc/wav2vec2#transformers.Wav2Vec2ForCTC)
+includes an example of how to transcribe speech to text in the
 [docstring of its forward function](https://huggingface.co/docs/transformers/model_doc/wav2vec2#transformers.Wav2Vec2ForCTC.forward).
 
 ## Writing documentation examples
@@ -350,18 +350,18 @@ The syntax for Example docstrings can look as follows:
     ```
 ```
 
-The docstring should give a minimal, clear example of how the respective model 
+The docstring should give a minimal, clear example of how the respective model
 is to be used in inference and also include the expected (ideally sensible)
 output.
-Often, readers will try out the example before even going through the function 
-or class definitions. Therefore, it is of utmost importance that the example 
+Often, readers will try out the example before even going through the function
+or class definitions. Therefore, it is of utmost importance that the example
 works as expected.
 
 ## Docstring testing
 
-To do so each example should be included in the doctests. 
-We use pytests' [doctest integration](https://docs.pytest.org/doctest.html) to verify that all of our examples run correctly. 
-For Transformers, the doctests are run on a daily basis via GitHub Actions as can be 
+To do so each example should be included in the doctests.
+We use pytests' [doctest integration](https://docs.pytest.org/doctest.html) to verify that all of our examples run correctly.
+For Transformers, the doctests are run on a daily basis via GitHub Actions as can be
 seen [here](https://github.com/huggingface/transformers/actions/workflows/doctests.yml).
 
 To include your example in the daily doctests, you need to add the filename that

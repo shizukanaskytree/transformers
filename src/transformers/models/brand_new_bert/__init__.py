@@ -13,10 +13,7 @@
 # limitations under the License.
 from typing import TYPE_CHECKING
 
-from ...utils import  _LazyModule, OptionalDependencyNotAvailable, is_tokenizers_available
-from ...utils import is_torch_available
-
-
+from ...utils import OptionalDependencyNotAvailable, _LazyModule, is_tokenizers_available, is_torch_available
 
 
 _import_structure = {
@@ -53,8 +50,6 @@ else:
     ]
 
 
-
-
 if TYPE_CHECKING:
     from .configuration_brand_new_bert import BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, BrandNewBertConfig
     from .tokenization_brand_new_bert import BrandNewBertTokenizer
@@ -75,8 +70,8 @@ if TYPE_CHECKING:
     else:
         from .modeling_brand_new_bert import (
             BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST,
-            BrandNewBertForMaskedLM,
             BrandNewBertForCausalLM,
+            BrandNewBertForMaskedLM,
             BrandNewBertForMultipleChoice,
             BrandNewBertForQuestionAnswering,
             BrandNewBertForSequenceClassification,
@@ -86,7 +81,6 @@ if TYPE_CHECKING:
             BrandNewBertPreTrainedModel,
             load_tf_weights_in_brand_new_bert,
         )
-
 
 
 else:

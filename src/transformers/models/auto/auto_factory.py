@@ -16,7 +16,7 @@
 import copy
 import importlib
 from collections import OrderedDict
-import pysnooper
+# import pysnooper
 
 from ...configuration_utils import PretrainedConfig
 from ...dynamic_module_utils import get_class_from_dynamic_module

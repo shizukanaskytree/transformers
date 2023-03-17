@@ -25,8 +25,9 @@ from ...test_configuration_common import ConfigTester
 from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor, random_attention_mask
 from ...test_pipeline_mixin import PipelineTesterMixin
 
-import sys
-import pysnooper
+
+# import sys
+# import pysnooper
 # import debugpy; debugpy.listen(5678); print("Waiting for debugger attach"); debugpy.wait_for_client();
 
 if is_torch_available():

@@ -12,9 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" PyTorch BrandNewBERT model. """
-
-
+""" PyTorch BrandNewBERT model."""
 
 
 import math
@@ -24,15 +22,8 @@ import torch
 import torch.utils.checkpoint
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
-from typing import Optional, Tuple, Union
 
 from ...activations import ACT2FN
-from ...utils import (
-    add_code_sample_docstrings,
-    add_start_docstrings,
-    add_start_docstrings_to_model_forward,
-    replace_return_docstrings,
-)
 from ...modeling_outputs import (
     BaseModelOutputWithPastAndCrossAttentions,
     CausalLMOutputWithCrossAttentions,
@@ -48,7 +39,13 @@ from ...pytorch_utils import (
     find_pruneable_heads_and_indices,
     prune_linear_layer,
 )
-from ...utils import logging
+from ...utils import (
+    add_code_sample_docstrings,
+    add_start_docstrings,
+    add_start_docstrings_to_model_forward,
+    logging,
+    replace_return_docstrings,
+)
 from .configuration_brand_new_bert import BrandNewBertConfig
 
 
@@ -215,7 +212,9 @@ class BrandNewBertSelfAttention(nn.Module):
         self.value = nn.Linear(config.hidden_size, self.all_head_size)
 
         self.dropout = nn.Dropout(config.attention_probs_dropout_prob)
-        self.position_embedding_type = position_embedding_type or getattr(config, "position_embedding_type", "absolute")
+        self.position_embedding_type = position_embedding_type or getattr(
+            config, "position_embedding_type", "absolute"
+        )
         if self.position_embedding_type == "relative_key" or self.position_embedding_type == "relative_key_query":
             self.max_position_embeddings = config.max_position_embeddings
             self.distance_embedding = nn.Embedding(2 * config.max_position_embeddings - 1, self.attention_head_size)
@@ -536,6 +535,7 @@ class BrandNewBertEncoder(nn.Module):
             past_key_value = past_key_values[i] if past_key_values is not None else None
 
             if self.gradient_checkpointing and self.training:
+
                 def create_custom_forward(module):
                     def custom_forward(*inputs):
                         return module(*inputs, past_key_value, output_attentions)
@@ -642,8 +642,8 @@ class BrandNewBertOnlyMLMHead(nn.Module):
 
 class BrandNewBertPreTrainedModel(PreTrainedModel):
     """
-    An abstract class to handle weights initialization and
-    a simple interface for downloading and loading pretrained models.
+    An abstract class to handle weights initialization and a simple interface for downloading and loading pretrained
+    models.
     """
 
     config_class = BrandNewBertConfig
@@ -653,7 +653,7 @@ class BrandNewBertPreTrainedModel(PreTrainedModel):
     _keys_to_ignore_on_load_missing = [r"position_ids"]
 
     def _init_weights(self, module):
-        """ Initialize the weights """
+        """Initialize the weights"""
         if isinstance(module, nn.Linear):
             # Slightly different from the TF version which uses truncated_normal for initialization
             # cf https://github.com/pytorch/pytorch/pull/5617
@@ -674,14 +674,14 @@ class BrandNewBertPreTrainedModel(PreTrainedModel):
 
 
 BRAND_NEW_BERT_START_DOCSTRING = r"""
-    This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module) sub-class.
-    Use it as a regular PyTorch Module and refer to the PyTorch documentation for all matter related to general
-    usage and behavior.
+    This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module) sub-class. Use
+    it as a regular PyTorch Module and refer to the PyTorch documentation for all matter related to general usage and
+    behavior.
 
     Parameters:
         config ([`~BrandNewBertConfig`]): Model configuration class with all the parameters of the model.
-            Initializing with a config file does not load the weights associated with the model, only the configuration.
-            Check out the [`~PreTrainedModel.from_pretrained`] method to load the model weights.
+            Initializing with a config file does not load the weights associated with the model, only the
+            configuration. Check out the [`~PreTrainedModel.from_pretrained`] method to load the model weights.
 """
 
 BRAND_NEW_BERT_INPUTS_DOCSTRING = r"""
@@ -689,8 +689,7 @@ BRAND_NEW_BERT_INPUTS_DOCSTRING = r"""
         input_ids (`torch.LongTensor` of shape `({0})`):
             Indices of input sequence tokens in the vocabulary.
 
-            Indices can be obtained using [`BrandNewBertTokenizer`].
-            See [`PreTrainedTokenizer.encode`] and
+            Indices can be obtained using [`BrandNewBertTokenizer`]. See [`PreTrainedTokenizer.encode`] and
             [`PreTrainedTokenizer.__call__`] for details.
 
             [What are input IDs?](../glossary#input-ids)
@@ -702,15 +701,16 @@ BRAND_NEW_BERT_INPUTS_DOCSTRING = r"""
 
             [What are attention masks?](../glossary#attention-mask)
         token_type_ids (`torch.LongTensor` of shape `({0})`, *optional*):
-            Segment token indices to indicate first and second portions of the inputs. Indices are selected in `[0, 1]`:
+            Segment token indices to indicate first and second portions of the inputs. Indices are selected in `[0,
+            1]`:
 
             - 0 corresponds to a *sentence A* token,
             - 1 corresponds to a *sentence B* token.
 
             [What are token type IDs?](../glossary#token-type-ids)
         position_ids (`torch.LongTensor` of shape `({0})`, *optional*):
-            Indices of positions of each input sequence tokens in the position embeddings.
-            Selected in the range `[0, config.max_position_embeddings - 1]`.
+            Indices of positions of each input sequence tokens in the position embeddings. Selected in the range `[0,
+            config.max_position_embeddings - 1]`.
 
             [What are position IDs?](../glossary#position-ids)
         head_mask (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`, *optional*):
@@ -720,9 +720,9 @@ BRAND_NEW_BERT_INPUTS_DOCSTRING = r"""
             - 0 indicates the head is **masked**.
 
         inputs_embeds (`torch.FloatTensor` of shape `({0}, hidden_size)`, *optional*):
-            Optionally, instead of passing `input_ids` you can choose to directly pass an embedded representation.
-            This is useful if you want more control over how to convert *input_ids* indices into associated vectors
-            than the model's internal embedding lookup matrix.
+            Optionally, instead of passing `input_ids` you can choose to directly pass an embedded representation. This
+            is useful if you want more control over how to convert *input_ids* indices into associated vectors than the
+            model's internal embedding lookup matrix.
         output_attentions (`bool`, *optional*):
             Whether or not to return the attentions tensors of all attention layers. See `attentions` under returned
             tensors for more detail.
@@ -741,17 +741,14 @@ BRAND_NEW_BERT_INPUTS_DOCSTRING = r"""
 class BrandNewBertModel(BrandNewBertPreTrainedModel):
     """
 
-    The model can behave as an encoder (with only self-attention) as well
-    as a decoder, in which case a layer of cross-attention is added between
-    the self-attention layers, following the architecture described in [Attention is
-    all you need](https://arxiv.org/abs/1706.03762) by Ashish Vaswani,
-    Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser and Illia Polosukhin.
+    The model can behave as an encoder (with only self-attention) as well as a decoder, in which case a layer of
+    cross-attention is added between the self-attention layers, following the architecture described in [Attention is
+    all you need](https://arxiv.org/abs/1706.03762) by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit,
+    Llion Jones, Aidan N. Gomez, Lukasz Kaiser and Illia Polosukhin.
 
-    To behave as an decoder the model needs to be initialized with the
-    `is_decoder` argument of the configuration set to `True`.
-    To be used in a Seq2Seq model, the model needs to initialized with both `is_decoder`
-    argument and `add_cross_attention` set to `True`; an
-    `encoder_hidden_states` is then expected as an input to the forward pass.
+    To behave as an decoder the model needs to be initialized with the `is_decoder` argument of the configuration set
+    to `True`. To be used in a Seq2Seq model, the model needs to initialized with both `is_decoder` argument and
+    `add_cross_attention` set to `True`; an `encoder_hidden_states` is then expected as an input to the forward pass.
     """
 
     def __init__(self, config):
@@ -772,8 +769,7 @@ class BrandNewBertModel(BrandNewBertPreTrainedModel):
 
     def _prune_heads(self, heads_to_prune):
         """Prunes heads of the model.
-        heads_to_prune: dict of {layer_num: list of heads to prune in this layer}
-        See base class PreTrainedModel
+        heads_to_prune: dict of {layer_num: list of heads to prune in this layer} See base class PreTrainedModel
         """
         for layer, heads in heads_to_prune.items():
             self.encoder.layer[layer].attention.prune_heads(heads)
@@ -802,23 +798,22 @@ class BrandNewBertModel(BrandNewBertPreTrainedModel):
     ):
         r"""
         encoder_hidden_states  (`torch.FloatTensor` of shape `(batch_size, sequence_length, hidden_size)`, *optional*):
-            Sequence of hidden-states at the output of the last layer of the encoder. Used in the cross-attention
-            if the model is configured as a decoder.
+            Sequence of hidden-states at the output of the last layer of the encoder. Used in the cross-attention if
+            the model is configured as a decoder.
         encoder_attention_mask (`torch.FloatTensor` of shape `(batch_size, sequence_length)`, *optional*):
-            Mask to avoid performing attention on the padding token indices of the encoder input. This mask
-            is used in the cross-attention if the model is configured as a decoder.
-            Mask values selected in `[0, 1]`:
+            Mask to avoid performing attention on the padding token indices of the encoder input. This mask is used in
+            the cross-attention if the model is configured as a decoder. Mask values selected in `[0, 1]`:
 
             - 1 for tokens that are **not masked**,
             - 0 for tokens that are **masked**.
         past_key_values (`tuple(tuple(torch.FloatTensor))` of length `config.n_layers` with each tuple having 4 tensors of shape `(batch_size, num_heads, sequence_length - 1, embed_size_per_head)`):
             Contains precomputed key and value hidden states of the attention blocks. Can be used to speed up decoding.
-            If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
-            (those that don't have their past key value states given to this model) of shape `(batch_size, 1)`
-            instead of all `decoder_input_ids` of shape `(batch_size, sequence_length)`.
+            If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids` (those that
+            don't have their past key value states given to this model) of shape `(batch_size, 1)` instead of all
+            `decoder_input_ids` of shape `(batch_size, sequence_length)`.
         use_cache (`bool`, *optional*):
-            If set to `True`, `past_key_values` key value states are returned and can be used to speed up
-            decoding (see `past_key_values`).
+            If set to `True`, `past_key_values` key value states are returned and can be used to speed up decoding (see
+            `past_key_values`).
         """
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -845,7 +840,6 @@ class BrandNewBertModel(BrandNewBertPreTrainedModel):
 
         # past_key_values_length
         past_key_values_length = past_key_values[0][0].shape[2] if past_key_values is not None else 0
-
 
         if attention_mask is None:
             attention_mask = torch.ones(((batch_size, seq_length + past_key_values_length)), device=device)
@@ -913,7 +907,7 @@ class BrandNewBertModel(BrandNewBertPreTrainedModel):
         )
 
 
-@add_start_docstrings("""BrandNewBERT Model with a `language modeling` head on top. """, BRAND_NEW_BERT_START_DOCSTRING)
+@add_start_docstrings("""BrandNewBERT Model with a `language modeling` head on top.""", BRAND_NEW_BERT_START_DOCSTRING)
 class BrandNewBertForMaskedLM(BrandNewBertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
@@ -959,10 +953,9 @@ class BrandNewBertForMaskedLM(BrandNewBertPreTrainedModel):
     ):
         r"""
         labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
-            Labels for computing the masked language modeling loss.
-            Indices should be in `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring)
-            Tokens with indices set to `-100` are ignored (masked), the loss is only computed for the tokens with labels
-            in `[0, ..., config.vocab_size]`.
+            Labels for computing the masked language modeling loss. Indices should be in `[-100, 0, ...,
+            config.vocab_size]` (see `input_ids` docstring) Tokens with indices set to `-100` are ignored (masked), the
+            loss is only computed for the tokens with labels in `[0, ..., config.vocab_size]`.
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
@@ -1015,7 +1008,8 @@ class BrandNewBertForMaskedLM(BrandNewBertPreTrainedModel):
 
 
 @add_start_docstrings(
-    """BrandNewBERT Model with a `language modeling` head on top for CLM fine-tuning. """, BRAND_NEW_BERT_START_DOCSTRING
+    """BrandNewBERT Model with a `language modeling` head on top for CLM fine-tuning.""",
+    BRAND_NEW_BERT_START_DOCSTRING,
 )
 class BrandNewBertForCausalLM(BrandNewBertPreTrainedModel):
 
@@ -1042,22 +1036,22 @@ class BrandNewBertForCausalLM(BrandNewBertPreTrainedModel):
     @add_start_docstrings_to_model_forward(BRAND_NEW_BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @replace_return_docstrings(output_type=CausalLMOutputWithCrossAttentions, config_class=_CONFIG_FOR_DOC)
     def forward(
-            self,
-            input_ids=None,
-            attention_mask=None,
-            token_type_ids=None,
-            position_ids=None,
-            inputs_embeds=None,
-            encoder_hidden_states=None,
-            encoder_attention_mask=None,
-            head_mask=None,
-            cross_attn_head_mask=None,
-            past_key_values=None,
-            labels=None,
-            use_cache=None,
-            output_attentions=None,
-            output_hidden_states=None,
-            return_dict=None,
+        self,
+        input_ids=None,
+        attention_mask=None,
+        token_type_ids=None,
+        position_ids=None,
+        inputs_embeds=None,
+        encoder_hidden_states=None,
+        encoder_attention_mask=None,
+        head_mask=None,
+        cross_attn_head_mask=None,
+        past_key_values=None,
+        labels=None,
+        use_cache=None,
+        output_attentions=None,
+        output_hidden_states=None,
+        return_dict=None,
     ):
         r"""
         encoder_hidden_states  (`torch.FloatTensor` of shape `(batch_size, sequence_length, hidden_size)`, *optional*):
@@ -1070,26 +1064,24 @@ class BrandNewBertForCausalLM(BrandNewBertPreTrainedModel):
             - 1 for tokens that are **not masked**,
             - 0 for tokens that are **masked**.
         past_key_values (`tuple(tuple(torch.FloatTensor))`, *optional*, returned when `use_cache=True` is passed or when `config.use_cache=True`):
-            Tuple of `tuple(torch.FloatTensor)` of length `config.n_layers`, with each tuple having 2
-            tensors of shape `(batch_size, num_heads, sequence_length, embed_size_per_head)`) and 2 additional
-            tensors of shape `(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)`. The two
-            additional tensors are only required when the model is used as a decoder in a Sequence to Sequence
-            model.
+            Tuple of `tuple(torch.FloatTensor)` of length `config.n_layers`, with each tuple having 2 tensors of shape
+            `(batch_size, num_heads, sequence_length, embed_size_per_head)`) and 2 additional tensors of shape
+            `(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)`. The two additional tensors are
+            only required when the model is used as a decoder in a Sequence to Sequence model.
 
-            Contains pre-computed hidden-states (key and values in the self-attention blocks and in the
-            cross-attention blocks) that can be used (see `past_key_values` input) to speed up sequential
-            decoding.
+            Contains pre-computed hidden-states (key and values in the self-attention blocks and in the cross-attention
+            blocks) that can be used (see `past_key_values` input) to speed up sequential decoding.
 
-            If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
-            (those that don't have their past key value states given to this model) of shape `(batch_size, 1)`
-            instead of all `decoder_input_ids` of shape `(batch_size, sequence_length)`.
+            If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids` (those that
+            don't have their past key value states given to this model) of shape `(batch_size, 1)` instead of all
+            `decoder_input_ids` of shape `(batch_size, sequence_length)`.
         labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
             Labels for computing the left-to-right language modeling loss (next word prediction). Indices should be in
             `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring) Tokens with indices set to `-100` are
             ignored (masked), the loss is only computed for the tokens with labels n `[0, ..., config.vocab_size]`.
         use_cache (`bool`, *optional*):
-            If set to `True`, `past_key_values` key value states are returned and can be used to speed up
-            decoding (see `past_key_values`).
+            If set to `True`, `past_key_values` key value states are returned and can be used to speed up decoding (see
+            `past_key_values`).
 
         Returns:
 
@@ -1099,17 +1091,16 @@ class BrandNewBertForCausalLM(BrandNewBertPreTrainedModel):
         >>> from transformers import BrandNewBertTokenizer, BrandNewBertForCausalLM, BrandNewBertConfig
         >>> import torch
 
-        >>> tokenizer = BrandNewBertTokenizer.from_pretrained('brand-new-bert-base-cased')
+        >>> tokenizer = BrandNewBertTokenizer.from_pretrained("brand-new-bert-base-cased")
         >>> config = BrandNewBertConfig.from_pretrained("brand-new-bert-base-cased")
         >>> config.is_decoder = True
-        >>> model = BrandNewBertForCausalLM.from_pretrained('brand-new-bert-base-cased', config=config)
+        >>> model = BrandNewBertForCausalLM.from_pretrained("brand-new-bert-base-cased", config=config)
 
         >>> inputs = tokenizer("Hello, my dog is cute", return_tensors="pt")
         >>> outputs = model(**inputs)
 
         >>> prediction_logits = outputs.logits
-        ```
-"""
+        ```"""
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         outputs = self.brand_new_bert(
@@ -1168,8 +1159,11 @@ class BrandNewBertForCausalLM(BrandNewBertPreTrainedModel):
     def _reorder_cache(self, past_key_values, beam_idx):
         reordered_past = ()
         for layer_past in past_key_values:
-            reordered_past += (tuple(past_state.index_select(0, beam_idx) for past_state in layer_past[:2]) + layer_past[2:],)
+            reordered_past += (
+                tuple(past_state.index_select(0, beam_idx) for past_state in layer_past[:2]) + layer_past[2:],
+            )
         return reordered_past
+
 
 class BrandNewBertClassificationHead(nn.Module):
     """Head for sentence-level classification tasks."""
@@ -1194,7 +1188,7 @@ class BrandNewBertClassificationHead(nn.Module):
 
 @add_start_docstrings(
     """BrandNewBERT Model transformer with a sequence classification/regression head on top (a linear layer on top of
-    the pooled output) e.g. for GLUE tasks. """,
+    the pooled output) e.g. for GLUE tasks.""",
     BRAND_NEW_BERT_START_DOCSTRING,
 )
 class BrandNewBertForSequenceClassification(BrandNewBertPreTrainedModel):
@@ -1214,24 +1208,23 @@ class BrandNewBertForSequenceClassification(BrandNewBertPreTrainedModel):
         config_class=_CONFIG_FOR_DOC,
     )
     def forward(
-            self,
-            input_ids=None,
-            attention_mask=None,
-            token_type_ids=None,
-            position_ids=None,
-            head_mask=None,
-            inputs_embeds=None,
-            labels=None,
-            output_attentions=None,
-            output_hidden_states=None,
-            return_dict=None,
+        self,
+        input_ids=None,
+        attention_mask=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        output_attentions=None,
+        output_hidden_states=None,
+        return_dict=None,
     ):
         r"""
         labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
-            Labels for computing the sequence classification/regression loss.
-            Indices should be in `[0, ..., config.num_labels - 1]`.
-            If `config.num_labels == 1` a regression loss is computed (Mean-Square loss),
-            If `config.num_labels > 1` a classification loss is computed (Cross-Entropy).
+            Labels for computing the sequence classification/regression loss. Indices should be in `[0, ...,
+            config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed (Mean-Square loss), If
+            `config.num_labels > 1` a classification loss is computed (Cross-Entropy).
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
@@ -1283,9 +1276,10 @@ class BrandNewBertForSequenceClassification(BrandNewBertPreTrainedModel):
             attentions=outputs.attentions,
         )
 
+
 @add_start_docstrings(
     """BrandNewBERT Model with a multiple choice classification head on top (a linear layer on top of
-    the pooled output and a softmax) e.g. for RocStories/SWAG tasks. """,
+    the pooled output and a softmax) e.g. for RocStories/SWAG tasks.""",
     BRAND_NEW_BERT_START_DOCSTRING,
 )
 class BrandNewBertForMultipleChoice(BrandNewBertPreTrainedModel):
@@ -1299,30 +1293,32 @@ class BrandNewBertForMultipleChoice(BrandNewBertPreTrainedModel):
         # Initialize weights and apply final processing
         self.post_init()
 
-    @add_start_docstrings_to_model_forward(BRAND_NEW_BERT_INPUTS_DOCSTRING.format("batch_size, num_choices, sequence_length"))
+    @add_start_docstrings_to_model_forward(
+        BRAND_NEW_BERT_INPUTS_DOCSTRING.format("batch_size, num_choices, sequence_length")
+    )
     @add_code_sample_docstrings(
         checkpoint=_CHECKPOINT_FOR_DOC,
         output_type=MultipleChoiceModelOutput,
         config_class=_CONFIG_FOR_DOC,
     )
     def forward(
-            self,
-            input_ids=None,
-            attention_mask=None,
-            token_type_ids=None,
-            position_ids=None,
-            head_mask=None,
-            inputs_embeds=None,
-            labels=None,
-            output_attentions=None,
-            output_hidden_states=None,
-            return_dict=None,
+        self,
+        input_ids=None,
+        attention_mask=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        output_attentions=None,
+        output_hidden_states=None,
+        return_dict=None,
     ):
         r"""
         labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
-            Labels for computing the multiple choice classification loss.
-            Indices should be in `[0, ..., num_choices-1]` where `num_choices` is the size of the second dimension
-            of the input tensors. (See `input_ids` above)
+            Labels for computing the multiple choice classification loss. Indices should be in `[0, ...,
+            num_choices-1]` where `num_choices` is the size of the second dimension of the input tensors. (See
+            `input_ids` above)
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
         num_choices = input_ids.shape[1] if input_ids is not None else inputs_embeds.shape[1]
@@ -1374,7 +1370,7 @@ class BrandNewBertForMultipleChoice(BrandNewBertPreTrainedModel):
 
 @add_start_docstrings(
     """BrandNewBERT Model with a token classification head on top (a linear layer on top of
-    the hidden-states output) e.g. for Named-Entity-Recognition (NER) tasks. """,
+    the hidden-states output) e.g. for Named-Entity-Recognition (NER) tasks.""",
     BRAND_NEW_BERT_START_DOCSTRING,
 )
 class BrandNewBertForTokenClassification(BrandNewBertPreTrainedModel):
@@ -1410,8 +1406,7 @@ class BrandNewBertForTokenClassification(BrandNewBertPreTrainedModel):
     ):
         r"""
         labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
-            Labels for computing the token classification loss.
-            Indices should be in `[0, ..., config.num_labels - 1]`.
+            Labels for computing the token classification loss. Indices should be in `[0, ..., config.num_labels - 1]`.
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
@@ -1451,7 +1446,7 @@ class BrandNewBertForTokenClassification(BrandNewBertPreTrainedModel):
 
 @add_start_docstrings(
     """BrandNewBERT Model with a span classification head on top for extractive question-answering tasks like SQuAD (a linear
-    layers on top of the hidden-states output to compute `span start logits` and `span end logits`). """,
+    layers on top of the hidden-states output to compute `span start logits` and `span end logits`).""",
     BRAND_NEW_BERT_START_DOCSTRING,
 )
 class BrandNewBertForQuestionAnswering(BrandNewBertPreTrainedModel):
@@ -1490,12 +1485,12 @@ class BrandNewBertForQuestionAnswering(BrandNewBertPreTrainedModel):
         r"""
         start_positions (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
             Labels for position (index) of the start of the labelled span for computing the token classification loss.
-            Positions are clamped to the length of the sequence (`sequence_length`).
-            Position outside of the sequence are not taken into account for computing the loss.
+            Positions are clamped to the length of the sequence (`sequence_length`). Position outside of the sequence
+            are not taken into account for computing the loss.
         end_positions (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
             Labels for position (index) of the end of the labelled span for computing the token classification loss.
-            Positions are clamped to the length of the sequence (`sequence_length`).
-            Position outside of the sequence are not taken into account for computing the loss.
+            Positions are clamped to the length of the sequence (`sequence_length`). Position outside of the sequence
+            are not taken into account for computing the loss.
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
