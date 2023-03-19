@@ -17,11 +17,11 @@
 import os
 import unittest
 
-from transformers import BertTokenizerFast
-from transformers.models.bert.tokenization_bert import (
+from transformers import BrandNewBertTokenizerFast
+from transformers.models.brand_new_bert.tokenization_brand_new_bert import (
     VOCAB_FILES_NAMES,
     BasicTokenizer,
-    BertTokenizer,
+    BrandNewBertTokenizer,
     WordpieceTokenizer,
     _is_control,
     _is_punctuation,
@@ -34,9 +34,9 @@ from ...test_tokenization_common import TokenizerTesterMixin, filter_non_english
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
 @require_tokenizers
-class BertTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
-    tokenizer_class = BertTokenizer
-    rust_tokenizer_class = BertTokenizerFast
+class BrandNewBertTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
+    tokenizer_class = BrandNewBertTokenizer
+    rust_tokenizer_class = BrandNewBertTokenizerFast
     test_rust_tokenizer = True
     space_between_special_tokens = True
     from_pretrained_filter = filter_non_english
@@ -237,7 +237,7 @@ class BertTokenizationTest(TokenizerTesterMixin, unittest.TestCase):
 
     @slow
     def test_sequence_builders(self):
-        tokenizer = self.tokenizer_class.from_pretrained("bert-base-uncased")
+        tokenizer = self.tokenizer_class.from_pretrained("skytree/brand-new-bert-base-uncased")
 
         text = tokenizer.encode("sequence builders", add_special_tokens=False)
         text_2 = tokenizer.encode("multi-sequence build", add_special_tokens=False)

@@ -60,6 +60,7 @@ from .utils import (
     to_py_obj,
 )
 
+# import pysnooper
 
 if TYPE_CHECKING:
     if is_torch_available():
@@ -1828,6 +1829,9 @@ class PreTrainedTokenizerBase(SpecialTokensMixin, PushToHubMixin):
     ):
         # We instantiate fast tokenizers based on a slow tokenizer if we don't have access to the tokenizer.json
         # file or if `from_slow` is set to True.
+
+        ### use pysnooper to debug: https://gist.github.com/shizukanaskytree/97f26f233d19e5649699d9d44389ef77
+        # with pysnooper.snoop("/home/wxf/atom_prj/transformers/_from_pretrained.log"):
         from_slow = kwargs.get("from_slow", False)
         has_tokenizer_file = resolved_vocab_files.get("tokenizer_file", None) is not None
         if (from_slow or not has_tokenizer_file) and cls.slow_tokenizer_class is not None:

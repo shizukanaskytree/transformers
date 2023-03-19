@@ -1,37 +1,66 @@
-# coding=utf-8
-# Copyright 2022 Xiaofeng Wu and The HuggingFace Inc. team. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-""" BrandNewBERT model configuration"""
+""" BRAND_NEW_BERT model configuration"""
+from collections import OrderedDict
+from typing import Mapping
 
 from ...configuration_utils import PretrainedConfig
+from ...onnx import OnnxConfig
 from ...utils import logging
 
 
 logger = logging.get_logger(__name__)
 
 BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP = {
-    "brand-new-bert-base-cased": "https://huggingface.co/brand-new-bert-base-cased/resolve/main/config.json",
-    # See all BrandNewBERT models at https://huggingface.co/models?filter=brand_new_bert
+    "brand-new-bert-base-uncased": "https://huggingface.co/bert-base-uncased/resolve/main/config.json",
+
+    # "bert-large-uncased": "https://huggingface.co/bert-large-uncased/resolve/main/config.json",
+    # "bert-base-cased": "https://huggingface.co/bert-base-cased/resolve/main/config.json",
+    # "bert-large-cased": "https://huggingface.co/bert-large-cased/resolve/main/config.json",
+    # "bert-base-multilingual-uncased": "https://huggingface.co/bert-base-multilingual-uncased/resolve/main/config.json",
+    # "bert-base-multilingual-cased": "https://huggingface.co/bert-base-multilingual-cased/resolve/main/config.json",
+    # "bert-base-chinese": "https://huggingface.co/bert-base-chinese/resolve/main/config.json",
+    # "bert-base-german-cased": "https://huggingface.co/bert-base-german-cased/resolve/main/config.json",
+    # "bert-large-uncased-whole-word-masking": (
+    #     "https://huggingface.co/bert-large-uncased-whole-word-masking/resolve/main/config.json"
+    # ),
+    # "bert-large-cased-whole-word-masking": (
+    #     "https://huggingface.co/bert-large-cased-whole-word-masking/resolve/main/config.json"
+    # ),
+    # "bert-large-uncased-whole-word-masking-finetuned-squad": (
+    #     "https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/config.json"
+    # ),
+    # "bert-large-cased-whole-word-masking-finetuned-squad": (
+    #     "https://huggingface.co/bert-large-cased-whole-word-masking-finetuned-squad/resolve/main/config.json"
+    # ),
+    # "bert-base-cased-finetuned-mrpc": "https://huggingface.co/bert-base-cased-finetuned-mrpc/resolve/main/config.json",
+    # "bert-base-german-dbmdz-cased": "https://huggingface.co/bert-base-german-dbmdz-cased/resolve/main/config.json",
+    # "bert-base-german-dbmdz-uncased": "https://huggingface.co/bert-base-german-dbmdz-uncased/resolve/main/config.json",
+    # "cl-tohoku/bert-base-japanese": "https://huggingface.co/cl-tohoku/bert-base-japanese/resolve/main/config.json",
+    # "cl-tohoku/bert-base-japanese-whole-word-masking": (
+    #     "https://huggingface.co/cl-tohoku/bert-base-japanese-whole-word-masking/resolve/main/config.json"
+    # ),
+    # "cl-tohoku/bert-base-japanese-char": (
+    #     "https://huggingface.co/cl-tohoku/bert-base-japanese-char/resolve/main/config.json"
+    # ),
+    # "cl-tohoku/bert-base-japanese-char-whole-word-masking": (
+    #     "https://huggingface.co/cl-tohoku/bert-base-japanese-char-whole-word-masking/resolve/main/config.json"
+    # ),
+    # "TurkuNLP/bert-base-finnish-cased-v1": (
+    #     "https://huggingface.co/TurkuNLP/bert-base-finnish-cased-v1/resolve/main/config.json"
+    # ),
+    # "TurkuNLP/bert-base-finnish-uncased-v1": (
+    #     "https://huggingface.co/TurkuNLP/bert-base-finnish-uncased-v1/resolve/main/config.json"
+    # ),
+    # "wietsedv/bert-base-dutch-cased": "https://huggingface.co/wietsedv/bert-base-dutch-cased/resolve/main/config.json",
+    # See all brand new BERT models at https://huggingface.co/models?filter=bert
 }
 
 
 class BrandNewBertConfig(PretrainedConfig):
     r"""
-    This is the configuration class to store the configuration of a [`~BrandNewBertModel`]. It is used to instantiate
-    an BrandNewBERT model according to the specified arguments, defining the model architecture. Instantiating a
+    This is the configuration class to store the configuration of a [`BrandNewBertModel`]. It is used to
+    instantiate a BrandNewBERT model according to the specified arguments, defining the model architecture. Instantiating a
     configuration with the defaults will yield a similar configuration to that of the BrandNewBERT
-    [brand-new-bert-base-cased](https://huggingface.co/brand-new-bert-base-cased) architecture.
+    [brand-new-bert-base-uncased](https://huggingface.co/bert-base-uncased) architecture.
 
     Configuration objects inherit from [`PretrainedConfig`] and can be used to control the model outputs. Read the
     documentation from [`PretrainedConfig`] for more information.
@@ -39,51 +68,61 @@ class BrandNewBertConfig(PretrainedConfig):
 
     Args:
         vocab_size (`int`, *optional*, defaults to 30522):
-            Vocabulary size of the BrandNewBERT model. Defines the number of different tokens that can be represented
-            by the `inputs_ids` passed when calling [`~BrandNewBertModel`] or [`~TFBrandNewBertModel`].
+            Vocabulary size of the BrandNewBERT model. Defines the number of different tokens that can be represented by the
+            `inputs_ids` passed when calling [`BrandNewBertModel`].
         hidden_size (`int`, *optional*, defaults to 768):
-            Dimension of the encoder layers and the pooler layer.
+            Dimensionality of the encoder layers and the pooler layer.
         num_hidden_layers (`int`, *optional*, defaults to 12):
             Number of hidden layers in the Transformer encoder.
         num_attention_heads (`int`, *optional*, defaults to 12):
             Number of attention heads for each attention layer in the Transformer encoder.
         intermediate_size (`int`, *optional*, defaults to 3072):
-            Dimension of the "intermediate" (i.e., feed-forward) layer in the Transformer encoder.
-        hidden_act (`str` or `function`, *optional*, defaults to `"gelu"`):
+            Dimensionality of the "intermediate" (often named feed-forward) layer in the Transformer encoder.
+        hidden_act (`str` or `Callable`, *optional*, defaults to `"gelu"`):
             The non-linear activation function (function or string) in the encoder and pooler. If string, `"gelu"`,
-            `"relu"`, `"selu"` and `"gelu_new"` are supported.
+            `"relu"`, `"silu"` and `"gelu_new"` are supported.
         hidden_dropout_prob (`float`, *optional*, defaults to 0.1):
-            The dropout probabilitiy for all fully connected layers in the embeddings, encoder, and pooler.
+            The dropout probability for all fully connected layers in the embeddings, encoder, and pooler.
         attention_probs_dropout_prob (`float`, *optional*, defaults to 0.1):
             The dropout ratio for the attention probabilities.
         max_position_embeddings (`int`, *optional*, defaults to 512):
             The maximum sequence length that this model might ever be used with. Typically set this to something large
             just in case (e.g., 512 or 1024 or 2048).
         type_vocab_size (`int`, *optional*, defaults to 2):
-            The vocabulary size of the `token_type_ids` passed when calling [`~BrandNewBertModel`] or
-            [`~TFBrandNewBertModel`].
+            The vocabulary size of the `token_type_ids` passed when calling [`BrandNewBertModel`].
         initializer_range (`float`, *optional*, defaults to 0.02):
             The standard deviation of the truncated_normal_initializer for initializing all weight matrices.
         layer_norm_eps (`float`, *optional*, defaults to 1e-12):
             The epsilon used by the layer normalization layers.
+        position_embedding_type (`str`, *optional*, defaults to `"absolute"`):
+            Type of position embedding. Choose one of `"absolute"`, `"relative_key"`, `"relative_key_query"`. For
+            positional embeddings use `"absolute"`. For more information on `"relative_key"`, please refer to
+            [Self-Attention with Relative Position Representations (Shaw et al.)](https://arxiv.org/abs/1803.02155).
+            For more information on `"relative_key_query"`, please refer to *Method 4* in [Improve Transformer Models
+            with Better Relative Position Embeddings (Huang et al.)](https://arxiv.org/abs/2009.13658).
+        is_decoder (`bool`, *optional*, defaults to `False`):
+            Whether the model is used as a decoder or not. If `False`, the model is used as an encoder.
         use_cache (`bool`, *optional*, defaults to `True`):
             Whether or not the model should return the last key/values attentions (not used by all models). Only
             relevant if `config.is_decoder=True`.
-        Example:
+        classifier_dropout (`float`, *optional*):
+            The dropout ratio for the classification head.
+
+    Examples:
 
     ```python
-    >>> from transformers import BrandNewBertModel, BrandNewBertConfig
+    >>> from transformers import BrandNewBertConfig, BrandNewBertModel
 
-    >>> # Initializing a BrandNewBERT brand-new-bert-base-cased style configuration
+    >>> # Initializing a BrandNewBERT bert-base-uncased style configuration
     >>> configuration = BrandNewBertConfig()
 
-    >>> # Initializing a model from the brand-new-bert-base-cased style configuration
+    >>> # Initializing a model (with random weights) from the brand-new-bert-base-uncased style configuration
     >>> model = BrandNewBertModel(configuration)
 
     >>> # Accessing the model configuration
     >>> configuration = model.config
     ```"""
-    model_type = "brand_new_bert"
+    model_type = "bert"
 
     def __init__(
         self,
@@ -99,23 +138,169 @@ class BrandNewBertConfig(PretrainedConfig):
         type_vocab_size=2,
         initializer_range=0.02,
         layer_norm_eps=1e-12,
+        pad_token_id=0,
+        position_embedding_type="absolute",
         use_cache=True,
-        pad_token_id=1,
-        bos_token_id=0,
-        eos_token_id=2,
+        classifier_dropout=None,
         **kwargs,
     ):
+        super().__init__(pad_token_id=pad_token_id, **kwargs)
+
         self.vocab_size = vocab_size
-        self.max_position_embeddings = max_position_embeddings
         self.hidden_size = hidden_size
         self.num_hidden_layers = num_hidden_layers
         self.num_attention_heads = num_attention_heads
-        self.intermediate_size = intermediate_size
         self.hidden_act = hidden_act
+        self.intermediate_size = intermediate_size
         self.hidden_dropout_prob = hidden_dropout_prob
         self.attention_probs_dropout_prob = attention_probs_dropout_prob
-        self.initializer_range = initializer_range
+        self.max_position_embeddings = max_position_embeddings
         self.type_vocab_size = type_vocab_size
+        self.initializer_range = initializer_range
         self.layer_norm_eps = layer_norm_eps
+        self.position_embedding_type = position_embedding_type
         self.use_cache = use_cache
-        super().__init__(pad_token_id=pad_token_id, bos_token_id=bos_token_id, eos_token_id=eos_token_id, **kwargs)
+        self.classifier_dropout = classifier_dropout
+
+
+class BrandNewBertOnnxConfig(OnnxConfig):
+    @property
+    def inputs(self) -> Mapping[str, Mapping[int, str]]:
+        if self.task == "multiple-choice":
+            dynamic_axis = {0: "batch", 1: "choice", 2: "sequence"}
+        else:
+            dynamic_axis = {0: "batch", 1: "sequence"}
+        return OrderedDict(
+            [
+                ("input_ids", dynamic_axis),
+                ("attention_mask", dynamic_axis),
+                ("token_type_ids", dynamic_axis),
+            ]
+        )
+
+
+# Next step: testings
+
+
+# # coding=utf-8
+# # Copyright 2022 Xiaofeng Wu and The HuggingFace Inc. team. All rights reserved.
+# #
+# # Licensed under the Apache License, Version 2.0 (the "License");
+# # you may not use this file except in compliance with the License.
+# # You may obtain a copy of the License at
+# #
+# #     http://www.apache.org/licenses/LICENSE-2.0
+# #
+# # Unless required by applicable law or agreed to in writing, software
+# # distributed under the License is distributed on an "AS IS" BASIS,
+# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# # See the License for the specific language governing permissions and
+# # limitations under the License.
+# """ BrandNewBERT model configuration"""
+
+# from ...configuration_utils import PretrainedConfig
+# from ...utils import logging
+
+
+# logger = logging.get_logger(__name__)
+
+# BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP = {
+#     "brand-new-bert-base-cased": "https://huggingface.co/brand-new-bert-base-cased/resolve/main/config.json",
+#     # See all BrandNewBERT models at https://huggingface.co/models?filter=brand_new_bert
+# }
+
+
+# class BrandNewBertConfig(PretrainedConfig):
+#     r"""
+#     This is the configuration class to store the configuration of a [`~BrandNewBertModel`]. It is used to instantiate
+#     an BrandNewBERT model according to the specified arguments, defining the model architecture. Instantiating a
+#     configuration with the defaults will yield a similar configuration to that of the BrandNewBERT
+#     [brand-new-bert-base-cased](https://huggingface.co/brand-new-bert-base-cased) architecture.
+
+#     Configuration objects inherit from [`PretrainedConfig`] and can be used to control the model outputs. Read the
+#     documentation from [`PretrainedConfig`] for more information.
+
+
+#     Args:
+#         vocab_size (`int`, *optional*, defaults to 30522):
+#             Vocabulary size of the BrandNewBERT model. Defines the number of different tokens that can be represented
+#             by the `inputs_ids` passed when calling [`~BrandNewBertModel`] or [`~TFBrandNewBertModel`].
+#         hidden_size (`int`, *optional*, defaults to 768):
+#             Dimension of the encoder layers and the pooler layer.
+#         num_hidden_layers (`int`, *optional*, defaults to 12):
+#             Number of hidden layers in the Transformer encoder.
+#         num_attention_heads (`int`, *optional*, defaults to 12):
+#             Number of attention heads for each attention layer in the Transformer encoder.
+#         intermediate_size (`int`, *optional*, defaults to 3072):
+#             Dimension of the "intermediate" (i.e., feed-forward) layer in the Transformer encoder.
+#         hidden_act (`str` or `function`, *optional*, defaults to `"gelu"`):
+#             The non-linear activation function (function or string) in the encoder and pooler. If string, `"gelu"`,
+#             `"relu"`, `"selu"` and `"gelu_new"` are supported.
+#         hidden_dropout_prob (`float`, *optional*, defaults to 0.1):
+#             The dropout probabilitiy for all fully connected layers in the embeddings, encoder, and pooler.
+#         attention_probs_dropout_prob (`float`, *optional*, defaults to 0.1):
+#             The dropout ratio for the attention probabilities.
+#         max_position_embeddings (`int`, *optional*, defaults to 512):
+#             The maximum sequence length that this model might ever be used with. Typically set this to something large
+#             just in case (e.g., 512 or 1024 or 2048).
+#         type_vocab_size (`int`, *optional*, defaults to 2):
+#             The vocabulary size of the `token_type_ids` passed when calling [`~BrandNewBertModel`] or
+#             [`~TFBrandNewBertModel`].
+#         initializer_range (`float`, *optional*, defaults to 0.02):
+#             The standard deviation of the truncated_normal_initializer for initializing all weight matrices.
+#         layer_norm_eps (`float`, *optional*, defaults to 1e-12):
+#             The epsilon used by the layer normalization layers.
+#         use_cache (`bool`, *optional*, defaults to `True`):
+#             Whether or not the model should return the last key/values attentions (not used by all models). Only
+#             relevant if `config.is_decoder=True`.
+#         Example:
+
+#     ```python
+#     >>> from transformers import BrandNewBertModel, BrandNewBertConfig
+
+#     >>> # Initializing a BrandNewBERT brand-new-bert-base-cased style configuration
+#     >>> configuration = BrandNewBertConfig()
+
+#     >>> # Initializing a model from the brand-new-bert-base-cased style configuration
+#     >>> model = BrandNewBertModel(configuration)
+
+#     >>> # Accessing the model configuration
+#     >>> configuration = model.config
+#     ```"""
+#     model_type = "brand_new_bert"
+
+#     def __init__(
+#         self,
+#         vocab_size=30522,
+#         hidden_size=768,
+#         num_hidden_layers=12,
+#         num_attention_heads=12,
+#         intermediate_size=3072,
+#         hidden_act="gelu",
+#         hidden_dropout_prob=0.1,
+#         attention_probs_dropout_prob=0.1,
+#         max_position_embeddings=512,
+#         type_vocab_size=2,
+#         initializer_range=0.02,
+#         layer_norm_eps=1e-12,
+#         use_cache=True,
+#         pad_token_id=1,
+#         bos_token_id=0,
+#         eos_token_id=2,
+#         **kwargs,
+#     ):
+#         self.vocab_size = vocab_size
+#         self.max_position_embeddings = max_position_embeddings
+#         self.hidden_size = hidden_size
+#         self.num_hidden_layers = num_hidden_layers
+#         self.num_attention_heads = num_attention_heads
+#         self.intermediate_size = intermediate_size
+#         self.hidden_act = hidden_act
+#         self.hidden_dropout_prob = hidden_dropout_prob
+#         self.attention_probs_dropout_prob = attention_probs_dropout_prob
+#         self.initializer_range = initializer_range
+#         self.type_vocab_size = type_vocab_size
+#         self.layer_norm_eps = layer_norm_eps
+#         self.use_cache = use_cache
+#         super().__init__(pad_token_id=pad_token_id, bos_token_id=bos_token_id, eos_token_id=eos_token_id, **kwargs)
+
