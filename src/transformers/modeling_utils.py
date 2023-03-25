@@ -75,7 +75,7 @@ from .utils.hub import convert_file_size_to_int, get_checkpoint_shard_files
 from .utils.import_utils import ENV_VARS_TRUE_VALUES, importlib_metadata, is_sagemaker_mp_enabled
 from .utils.quantization_config import BitsAndBytesConfig
 from .utils.versions import require_version_core
-
+import pysnooper
 
 XLA_USE_BF16 = os.environ.get("XLA_USE_BF16", "0").upper()
 XLA_DOWNCAST_BF16 = os.environ.get("XLA_DOWNCAST_BF16", "0").upper()
@@ -1041,6 +1041,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         """
         return "pt"
 
+    # @pysnooper.snoop('__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config: PretrainedConfig, *inputs, **kwargs):
         super().__init__()
         if not isinstance(config, PretrainedConfig):
@@ -1053,6 +1054,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         self.config = config
         self.name_or_path = config.name_or_path
         self.warnings_issued = {}
+        # print('self.can_generate(): ', self.can_generate())
         self.generation_config = GenerationConfig.from_model_config(config) if self.can_generate() else None
 
     def post_init(self):
@@ -1063,6 +1065,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         self.init_weights()
         self._backward_compatibility_gradient_checkpointing()
 
+    # @pysnooper.snoop('_backward_compatibility_gradient_checkpointing.log', color=False, max_variable_length=2000)
     def _backward_compatibility_gradient_checkpointing(self):
         if self.supports_gradient_checkpointing and getattr(self.config, "gradient_checkpointing", False):
             self.gradient_checkpointing_enable()
@@ -1215,6 +1218,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         self._init_weights(module)
         module._is_hf_initialized = True
 
+    # @pysnooper.snoop('tie_weights.log', color=False, max_variable_length=2000)
     def tie_weights(self):
         """
         Tie the weights between the input embeddings and the output embeddings.
@@ -1540,6 +1544,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
             f"overwrite this method in the class {self.__class__} in `modeling_{self.__class__.__module__}.py`"
         )
 
+    # @pysnooper.snoop('init_weights.log', color=False, max_variable_length=2000)
     def init_weights(self):
         """
         If needed prunes and maybe initializes weights. If using a custom `PreTrainedModel`, you need to implement any

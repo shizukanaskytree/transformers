@@ -26,7 +26,7 @@ from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor,
 from ...test_pipeline_mixin import PipelineTesterMixin
 
 # import sys
-# import pysnooper
+import pysnooper
 # import debugpy; debugpy.listen(5678); print("Waiting for debugger attach"); debugpy.wait_for_client();
 # import cProfile, pstats
 
@@ -98,6 +98,7 @@ class BertModelTester:
         self.num_choices = num_choices
         self.scope = scope
 
+    # @pysnooper.snoop('prepare_config_and_inputs.log', color=False, max_variable_length=1000)
     def prepare_config_and_inputs(self):
         # with pysnooper.snoop("./log_prepare_config_and_inputs.txt"):
         input_ids = ids_tensor([self.batch_size, self.seq_length], self.vocab_size)
@@ -170,6 +171,7 @@ class BertModelTester:
             encoder_attention_mask,
         )
 
+    # @pysnooper.snoop('create_and_check_model.log', color=False, max_variable_length=1000)
     def create_and_check_model(
         self, config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
     ):
@@ -511,6 +513,7 @@ class BertModelTest(ModelTesterMixin, GenerationTesterMixin, PipelineTesterMixin
         # stats.dump_stats('./test_config.prof')
         # os.system('gprof2dot -f pstats ./test_config.prof -o ./test_config.dot')
 
+    # @pysnooper.snoop('test_model.log', color=False, max_variable_length=1000)
     def test_model(self):
         # profiler = cProfile.Profile()
         # profiler.enable()

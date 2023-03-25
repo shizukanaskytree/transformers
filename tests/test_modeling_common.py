@@ -96,6 +96,7 @@ from transformers.utils import (
 )
 from transformers.utils.generic import ModelOutput
 
+import pysnooper
 
 sys.path.append(str(Path(__file__).parent.parent / "utils"))
 
@@ -2664,7 +2665,7 @@ class ModelTesterMixin:
 
 global_rng = random.Random()
 
-
+# @pysnooper.snoop('ids_tensor.log', color=False, max_variable_length=1000)
 def ids_tensor(shape, vocab_size, rng=None, name=None):
     #  Creates a random int32 tensor of the shape within the vocab size
     if rng is None:
@@ -2681,6 +2682,7 @@ def ids_tensor(shape, vocab_size, rng=None, name=None):
     return torch.tensor(data=values, dtype=torch.long, device=torch_device).view(shape).contiguous()
 
 
+# @pysnooper.snoop('random_attention_mask.log', color=False, max_variable_length=1000)
 def random_attention_mask(shape, rng=None, name=None):
     attn_mask = ids_tensor(shape, vocab_size=2, rng=None, name=None)
     # make sure that at least one token is attended to for each batch

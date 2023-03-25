@@ -52,6 +52,7 @@ from ...utils import (
 from .configuration_bert import BertConfig
 
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); print("Waiting for debugger to attach..."); debugpy.breakpoint()
+import pysnooper
 
 logger = logging.get_logger(__name__)
 
@@ -181,6 +182,7 @@ def load_tf_weights_in_bert(model, config, tf_checkpoint_path):
 class BertEmbeddings(nn.Module):
     """Construct the embeddings from word, position and token_type embeddings."""
 
+    # @pysnooper.snoop('BertEmbeddings__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__()
         self.word_embeddings = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=config.pad_token_id)
@@ -198,6 +200,7 @@ class BertEmbeddings(nn.Module):
             "token_type_ids", torch.zeros(self.position_ids.size(), dtype=torch.long), persistent=False
         )
 
+    # @pysnooper.snoop('BertEmbeddings-forward.log', color=False, max_variable_length=2000)
     def forward(
         self,
         input_ids: Optional[torch.LongTensor] = None,
@@ -241,6 +244,7 @@ class BertEmbeddings(nn.Module):
 
 
 class BertSelfAttention(nn.Module):
+    # @pysnooper.snoop('BertSelfAttention__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config, position_embedding_type=None):
         super().__init__()
         if config.hidden_size % config.num_attention_heads != 0 and not hasattr(config, "embedding_size"):
@@ -272,6 +276,7 @@ class BertSelfAttention(nn.Module):
         x = x.view(new_x_shape)
         return x.permute(0, 2, 1, 3)
 
+    # @pysnooper.snoop('BertSelfAttention-forward.log', color=False, max_variable_length=2000)
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -375,12 +380,14 @@ class BertSelfAttention(nn.Module):
 
 
 class BertSelfOutput(nn.Module):
+    # @pysnooper.snoop('BertSelfOutput__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
+    # @pysnooper.snoop('BertSelfOutput-forward.log', color=False, max_variable_length=2000)
     def forward(self, hidden_states: torch.Tensor, input_tensor: torch.Tensor) -> torch.Tensor:
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
@@ -389,6 +396,7 @@ class BertSelfOutput(nn.Module):
 
 
 class BertAttention(nn.Module):
+    # @pysnooper.snoop('BertAttention__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config, position_embedding_type=None):
         super().__init__()
         self.self = BertSelfAttention(config, position_embedding_type=position_embedding_type)
@@ -413,6 +421,7 @@ class BertAttention(nn.Module):
         self.self.all_head_size = self.self.attention_head_size * self.self.num_attention_heads
         self.pruned_heads = self.pruned_heads.union(heads)
 
+    # @pysnooper.snoop('BertAttention-forward.log', color=False, max_variable_length=2000)
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -438,6 +447,7 @@ class BertAttention(nn.Module):
 
 
 class BertIntermediate(nn.Module):
+    # @pysnooper.snoop('BertIntermediate __init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__()
         self.dense = nn.Linear(config.hidden_size, config.intermediate_size)
@@ -446,6 +456,7 @@ class BertIntermediate(nn.Module):
         else:
             self.intermediate_act_fn = config.hidden_act
 
+    # @pysnooper.snoop('BertIntermediate-forward.log', color=False, max_variable_length=2000)
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         hidden_states = self.dense(hidden_states)
         hidden_states = self.intermediate_act_fn(hidden_states)
@@ -453,6 +464,7 @@ class BertIntermediate(nn.Module):
 
 
 class BertOutput(nn.Module):
+    # @pysnooper.snoop('BertOutput __init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__()
         self.dense = nn.Linear(config.intermediate_size, config.hidden_size)
@@ -467,6 +479,7 @@ class BertOutput(nn.Module):
 
 
 class BertLayer(nn.Module):
+    # @pysnooper.snoop('BertLayer__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__()
         self.chunk_size_feed_forward = config.chunk_size_feed_forward
@@ -481,6 +494,7 @@ class BertLayer(nn.Module):
         self.intermediate = BertIntermediate(config)
         self.output = BertOutput(config)
 
+    # @pysnooper.snoop('BertLayer-forward.log', color=False, max_variable_length=2000)
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -553,12 +567,14 @@ class BertLayer(nn.Module):
 
 
 class BertEncoder(nn.Module):
+    # @pysnooper.snoop('BertEncoder__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__()
         self.config = config
         self.layer = nn.ModuleList([BertLayer(config) for _ in range(config.num_hidden_layers)])
         self.gradient_checkpointing = False
 
+    # @pysnooper.snoop('BertEncoder-forward.log', color=False, max_variable_length=2000)
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -651,11 +667,13 @@ class BertEncoder(nn.Module):
 
 
 class BertPooler(nn.Module):
+    # @pysnooper.snoop('BertPooler __init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
         self.activation = nn.Tanh()
 
+    # @pysnooper.snoop('BertPooler-forward.log', color=False, max_variable_length=2000)
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         # We "pool" the model by simply taking the hidden state corresponding
         # to the first token.
@@ -884,6 +902,7 @@ class BertModel(BertPreTrainedModel):
     `add_cross_attention` set to `True`; an `encoder_hidden_states` is then expected as an input to the forward pass.
     """
 
+    # @pysnooper.snoop('__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config, add_pooling_layer=True):
         super().__init__(config)
         self.config = config
@@ -910,6 +929,7 @@ class BertModel(BertPreTrainedModel):
         for layer, heads in heads_to_prune.items():
             self.encoder.layer[layer].attention.prune_heads(heads)
 
+    # @pysnooper.snoop('BertModel-forward.log', color=False, max_variable_length=2000)
     @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @add_code_sample_docstrings(
         checkpoint=_CHECKPOINT_FOR_DOC,
