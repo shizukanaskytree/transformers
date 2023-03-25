@@ -174,3 +174,6 @@ bert.onnx
 log_get_config.txt
 log_init.txt
 log_prepare_config_and_inputs.txt
+
+*.prof
+*.dot

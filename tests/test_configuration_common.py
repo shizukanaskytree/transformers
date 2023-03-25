@@ -35,6 +35,7 @@ sys.path.append(str(Path(__file__).parent.parent / "utils"))
 
 from test_module.custom_configuration import CustomConfig  # noqa E402
 
+import pysnooper
 
 config_common_kwargs = {
     "return_dict": False,
@@ -99,6 +100,7 @@ class ConfigTester(object):
         self.has_text_modality = has_text_modality
         self.inputs_dict = kwargs
 
+    # @pysnooper.snoop('create_and_test_config_common_properties.log', color=False)
     def create_and_test_config_common_properties(self):
         config = self.config_class(**self.inputs_dict)
         common_properties = ["hidden_size", "num_attention_heads", "num_hidden_layers"]
@@ -135,12 +137,14 @@ class ConfigTester(object):
                 # In that case, a NotImplementedError is raised
                 pass
 
+    # @pysnooper.snoop('create_and_test_config_to_json_string.log', color=False)
     def create_and_test_config_to_json_string(self):
         config = self.config_class(**self.inputs_dict)
         obj = json.loads(config.to_json_string())
         for key, value in self.inputs_dict.items():
             self.parent.assertEqual(obj[key], value)
 
+    # @pysnooper.snoop('create_and_test_config_to_json_file.log', color=False)
     def create_and_test_config_to_json_file(self):
         config_first = self.config_class(**self.inputs_dict)
 
@@ -151,6 +155,7 @@ class ConfigTester(object):
 
         self.parent.assertEqual(config_second.to_dict(), config_first.to_dict())
 
+    # @pysnooper.snoop('create_and_test_config_from_and_save_pretrained.log', color=False, max_variable_length=1000)
     def create_and_test_config_from_and_save_pretrained(self):
         config_first = self.config_class(**self.inputs_dict)
 
@@ -160,6 +165,7 @@ class ConfigTester(object):
 
         self.parent.assertEqual(config_second.to_dict(), config_first.to_dict())
 
+    # @pysnooper.snoop('create_and_test_config_from_and_save_pretrained_subfolder.log', color=False, max_variable_length=1000)
     def create_and_test_config_from_and_save_pretrained_subfolder(self):
         config_first = self.config_class(**self.inputs_dict)
 
@@ -171,6 +177,7 @@ class ConfigTester(object):
 
         self.parent.assertEqual(config_second.to_dict(), config_first.to_dict())
 
+    # @pysnooper.snoop('create_and_test_config_with_num_labels.log', color=False, max_variable_length=1000)
     def create_and_test_config_with_num_labels(self):
         config = self.config_class(**self.inputs_dict, num_labels=5)
         self.parent.assertEqual(len(config.id2label), 5)
@@ -180,12 +187,14 @@ class ConfigTester(object):
         self.parent.assertEqual(len(config.id2label), 3)
         self.parent.assertEqual(len(config.label2id), 3)
 
+    # @pysnooper.snoop('check_config_can_be_init_without_params.log', color=False, max_variable_length=1000)
     def check_config_can_be_init_without_params(self):
         if self.config_class.is_composition:
             return
         config = self.config_class()
         self.parent.assertIsNotNone(config)
 
+    # @pysnooper.snoop('check_config_arguments_init.log', color=False, max_variable_length=1000)
     def check_config_arguments_init(self):
         kwargs = copy.deepcopy(config_common_kwargs)
         config = self.config_class(**kwargs)

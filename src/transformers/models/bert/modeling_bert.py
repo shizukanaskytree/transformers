@@ -51,6 +51,7 @@ from ...utils import (
 )
 from .configuration_bert import BertConfig
 
+# import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); print("Waiting for debugger to attach..."); debugpy.breakpoint()
 
 logger = logging.get_logger(__name__)
 

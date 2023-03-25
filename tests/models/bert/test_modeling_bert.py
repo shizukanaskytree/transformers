@@ -25,10 +25,10 @@ from ...test_configuration_common import ConfigTester
 from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor, random_attention_mask
 from ...test_pipeline_mixin import PipelineTesterMixin
 
-
 # import sys
 # import pysnooper
 # import debugpy; debugpy.listen(5678); print("Waiting for debugger attach"); debugpy.wait_for_client();
+# import cProfile, pstats
 
 if is_torch_available():
     import torch
@@ -500,24 +500,63 @@ class BertModelTest(ModelTesterMixin, GenerationTesterMixin, PipelineTesterMixin
         self.config_tester = ConfigTester(self, config_class=BertConfig, hidden_size=37)
 
     def test_config(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         self.config_tester.run_common_tests()
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_config.prof')
+        # os.system('gprof2dot -f pstats ./test_config.prof -o ./test_config.dot')
+
     def test_model(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_model(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model.prof')
+        # os.system('gprof2dot -f pstats ./test_model.prof -o ./test_model.dot')
+
     def test_model_various_embeddings(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         for type in ["absolute", "relative_key", "relative_key_query"]:
             config_and_inputs[0].position_embedding_type = type
             self.model_tester.create_and_check_model(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_various_embeddings.prof')
+        # os.system('gprof2dot -f pstats ./test_model_various_embeddings.prof -o ./test_model_various_embeddings.dot')
+
     def test_model_as_decoder(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
         self.model_tester.create_and_check_model_as_decoder(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_as_decoder.prof')
+        # os.system('gprof2dot -f pstats ./test_model_as_decoder.prof -o ./test_model_as_decoder.dot')
+
     def test_model_as_decoder_with_default_input_mask(self):
         # This regression test was failing with PyTorch < 1.3
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         (
             config,
             input_ids,
@@ -544,60 +583,177 @@ class BertModelTest(ModelTesterMixin, GenerationTesterMixin, PipelineTesterMixin
             encoder_attention_mask,
         )
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_as_decoder_with_default_input_mask.prof')
+        # os.system('gprof2dot -f pstats ./test_model_as_decoder_with_default_input_mask.prof -o ./test_model_as_decoder_with_default_input_mask.dot')
+
     def test_for_causal_lm(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
         self.model_tester.create_and_check_for_causal_lm(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_causal_lm.prof')
+        # os.system('gprof2dot -f pstats ./test_for_causal_lm.prof -o ./test_for_causal_lm.dot')
+
     def test_for_masked_lm(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_for_masked_lm(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_masked_lm.prof')
+        # os.system('gprof2dot -f pstats ./test_for_masked_lm.prof -o ./test_for_masked_lm.dot')
+
     def test_for_causal_lm_decoder(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
         self.model_tester.create_and_check_model_for_causal_lm_as_decoder(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_causal_lm_decoder.prof')
+        # os.system('gprof2dot -f pstats ./test_for_causal_lm_decoder.prof -o ./test_for_causal_lm_decoder.dot')
+
     def test_decoder_model_past_with_large_inputs(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
         self.model_tester.create_and_check_decoder_model_past_large_inputs(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_decoder_model_past_with_large_inputs.prof')
+        # os.system('gprof2dot -f pstats ./test_decoder_model_past_with_large_inputs.prof -o ./test_decoder_model_past_with_large_inputs.dot')
+
     def test_decoder_model_past_with_large_inputs_relative_pos_emb(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
         config_and_inputs[0].position_embedding_type = "relative_key"
         self.model_tester.create_and_check_decoder_model_past_large_inputs(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_decoder_model_past_with_large_inputs_relative_pos_emb.prof')
+        # os.system('gprof2dot -f pstats ./test_decoder_model_past_with_large_inputs_relative_pos_emb.prof -o ./test_decoder_model_past_with_large_inputs_relative_pos_emb.dot')
+
     def test_for_multiple_choice(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_for_multiple_choice(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_multiple_choice.prof')
+        # os.system('gprof2dot -f pstats ./test_for_multiple_choice.prof -o ./test_for_multiple_choice.dot')
+
     def test_for_next_sequence_prediction(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_for_next_sequence_prediction(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_next_sequence_prediction.prof')
+        # os.system('gprof2dot -f pstats ./test_for_next_sequence_prediction.prof -o ./test_for_next_sequence_prediction.dot')
+
     def test_for_pretraining(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_for_pretraining(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_pretraining.prof')
+        # os.system('gprof2dot -f pstats ./test_for_pretraining.prof -o ./test_for_pretraining.dot')
+
     def test_for_question_answering(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_for_question_answering(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_question_answering.prof')
+        # os.system('gprof2dot -f pstats ./test_for_question_answering.prof -o ./test_for_question_answering.dot')
+
     def test_for_sequence_classification(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_for_sequence_classification(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_sequence_classification.prof')
+        # os.system('gprof2dot -f pstats ./test_for_sequence_classification.prof -o ./test_for_sequence_classification.dot')
+
     def test_for_token_classification(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_for_token_classification(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_token_classification.prof')
+        # os.system('gprof2dot -f pstats ./test_for_token_classification.prof -o ./test_for_token_classification.dot')
+
     @slow
     def test_model_from_pretrained(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         for model_name in BERT_PRETRAINED_MODEL_ARCHIVE_LIST[:1]:
             model = BertModel.from_pretrained(model_name)
             self.assertIsNotNone(model)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_from_pretrained.prof')
+        # os.system('gprof2dot -f pstats ./test_model_from_pretrained.prof -o ./test_model_from_pretrained.dot')
+
     @slow
     @require_torch_gpu
     def test_torchscript_device_change(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config, inputs_dict = self.model_tester.prepare_config_and_inputs_for_common()
         for model_class in self.all_model_classes:
             # BertForMultipleChoice behaves incorrectly in JIT environments.
@@ -617,11 +773,19 @@ class BertModelTest(ModelTesterMixin, GenerationTesterMixin, PipelineTesterMixin
                 loaded = torch.jit.load(os.path.join(tmp, "bert.pt"), map_location=torch_device)
                 loaded(inputs_dict["input_ids"].to(torch_device), inputs_dict["attention_mask"].to(torch_device))
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_torchscript_device_change.prof')
+        # os.system('gprof2dot -f pstats ./test_torchscript_device_change.prof -o ./test_torchscript_device_change.dot')
 
 @require_torch
 class BertModelIntegrationTest(unittest.TestCase):
     @slow
     def test_inference_no_head_absolute_embedding(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         model = BertModel.from_pretrained("bert-base-uncased")
         input_ids = torch.tensor([[0, 345, 232, 328, 740, 140, 1695, 69, 6078, 1588, 2]])
         attention_mask = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
@@ -633,8 +797,17 @@ class BertModelIntegrationTest(unittest.TestCase):
 
         self.assertTrue(torch.allclose(output[:, 1:4, 1:4], expected_slice, atol=1e-4))
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_inference_no_head_absolute_embedding.prof')
+        # os.system('gprof2dot -f pstats ./test_inference_no_head_absolute_embedding.prof -o ./test_inference_no_head_absolute_embedding.dot')
+
     @slow
     def test_inference_no_head_relative_embedding_key(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         model = BertModel.from_pretrained("zhiheng-huang/bert-base-uncased-embedding-relative-key")
         input_ids = torch.tensor([[0, 345, 232, 328, 740, 140, 1695, 69, 6078, 1588, 2]])
         attention_mask = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
@@ -648,8 +821,17 @@ class BertModelIntegrationTest(unittest.TestCase):
 
         self.assertTrue(torch.allclose(output[:, 1:4, 1:4], expected_slice, atol=1e-4))
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_inference_no_head_relative_embedding_key.prof')
+        # os.system('gprof2dot -f pstats ./test_inference_no_head_relative_embedding_key.prof -o ./test_inference_no_head_relative_embedding_key.dot')
+
     @slow
     def test_inference_no_head_relative_embedding_key_query(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         model = BertModel.from_pretrained("zhiheng-huang/bert-base-uncased-embedding-relative-key-query")
         input_ids = torch.tensor([[0, 345, 232, 328, 740, 140, 1695, 69, 6078, 1588, 2]])
         attention_mask = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
@@ -662,3 +844,9 @@ class BertModelIntegrationTest(unittest.TestCase):
         )
 
         self.assertTrue(torch.allclose(output[:, 1:4, 1:4], expected_slice, atol=1e-4))
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_inference_no_head_relative_embedding_key_query.prof')
+        # os.system('gprof2dot -f pstats ./test_inference_no_head_relative_embedding_key_query.prof -o ./test_inference_no_head_relative_embedding_key_query.dot')
