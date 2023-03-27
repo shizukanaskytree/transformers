@@ -1536,6 +1536,7 @@ class BertForNextSentencePrediction(BertPreTrainedModel):
     BERT_START_DOCSTRING,
 )
 class BertForSequenceClassification(BertPreTrainedModel):
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/BertForSequenceClassification-init.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = config.num_labels
@@ -1551,6 +1552,7 @@ class BertForSequenceClassification(BertPreTrainedModel):
         # Initialize weights and apply final processing
         self.post_init()
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/BertForSequenceClassification-fw.log', color=False, max_variable_length=2000)
     @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @add_code_sample_docstrings(
         checkpoint=_CHECKPOINT_FOR_SEQUENCE_CLASSIFICATION,

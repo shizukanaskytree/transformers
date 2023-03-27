@@ -57,6 +57,7 @@ from transformers import (
 from transformers.utils import check_min_version, get_full_repo_name, send_example_telemetry
 from transformers.utils.versions import require_version
 
+import pysnooper
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.27.0.dev0")
@@ -66,7 +67,7 @@ require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/lang
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
-
+# @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/language-modeling/parse_args.log', color=False, max_variable_length=2000)
 def parse_args():
     parser = argparse.ArgumentParser(description="Finetune a transformers model on a Masked Language Modeling task")
     parser.add_argument(
@@ -250,6 +251,7 @@ def parse_args():
     return args
 
 
+# @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/language-modeling/main.log', color=False, max_variable_length=2000)
 def main():
     args = parse_args()
 
@@ -653,6 +655,12 @@ def main():
             if completed_steps >= args.max_train_steps:
                 break
 
+        #     if step == 2: # for profiling
+        #         break
+
+        # if epoch == 1: # for profiling
+        #     break
+
         model.eval()
         losses = []
         for step, batch in enumerate(eval_dataloader):
@@ -661,6 +669,9 @@ def main():
 
             loss = outputs.loss
             losses.append(accelerator.gather_for_metrics(loss.repeat(args.per_device_eval_batch_size)))
+
+            # if step == 2: # for profiling
+            #     break
 
         losses = torch.cat(losses)
         try:

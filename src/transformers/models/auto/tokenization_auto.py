@@ -36,6 +36,7 @@ from .configuration_auto import (
     replace_list_option_in_docstrings,
 )
 
+import pysnooper
 
 logger = logging.get_logger(__name__)
 
@@ -501,6 +502,8 @@ class AutoTokenizer:
             "using the `AutoTokenizer.from_pretrained(pretrained_model_name_or_path)` method."
         )
 
+    # place after the @classmethod
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/AutoTokenizer-from_pretrained.log', color=False, max_variable_length=2000)
     @classmethod
     @replace_list_option_in_docstrings(TOKENIZER_MAPPING_NAMES)
     def from_pretrained(cls, pretrained_model_name_or_path, *inputs, **kwargs):

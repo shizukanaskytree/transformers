@@ -154,6 +154,7 @@ from .utils import (
 )
 from .utils.generic import ContextManagers
 
+import pysnooper
 
 _is_native_cpu_amp_available = is_torch_greater_or_equal_than_1_10
 
@@ -304,6 +305,7 @@ class Trainer:
 
     from .trainer_pt_utils import _get_learning_rate, log_metrics, metrics_format, save_metrics, save_state
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/Trainer.log', color=False, max_variable_length=2000)
     def __init__(
         self,
         model: Union[PreTrainedModel, nn.Module] = None,
@@ -1549,6 +1551,7 @@ class Trainer:
 
         return model
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/train.log', color=False, max_variable_length=2000)
     def train(
         self,
         resume_from_checkpoint: Optional[Union[str, bool]] = None,
@@ -1635,6 +1638,7 @@ class Trainer:
             ignore_keys_for_eval=ignore_keys_for_eval,
         )
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/_inner_training_loop.log', color=False, max_variable_length=2000)
     def _inner_training_loop(
         self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
@@ -2612,6 +2616,7 @@ class Trainer:
 
         return ctx_manager
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/training_step.log', color=False, max_variable_length=2000)
     def training_step(self, model: nn.Module, inputs: Dict[str, Union[torch.Tensor, Any]]) -> torch.Tensor:
         """
         Perform a training step on a batch of inputs.
@@ -2660,6 +2665,7 @@ class Trainer:
 
         return loss.detach()
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/compute_loss.log', color=False, max_variable_length=2000)
     def compute_loss(self, model, inputs, return_outputs=False):
         """
         How the loss is computed by Trainer. By default, all models return the loss in the first element.

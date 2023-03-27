@@ -23,6 +23,7 @@ from ...dynamic_module_utils import get_class_from_dynamic_module
 from ...utils import copy_func, logging
 from .configuration_auto import AutoConfig, model_type_to_module_name, replace_list_option_in_docstrings
 
+import pysnooper
 
 logger = logging.get_logger(__name__)
 
@@ -416,6 +417,8 @@ class _BaseAutoModelClass:
             f"Model type should be one of {', '.join(c.__name__ for c in cls._model_mapping.keys())}."
         )
 
+    # place after the @classmethod
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/_BaseAutoModelClass-from_pretrained.log', color=False, max_variable_length=2000)
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
         config = kwargs.pop("config", None)

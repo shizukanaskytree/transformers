@@ -1057,6 +1057,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         # print('self.can_generate(): ', self.can_generate())
         self.generation_config = GenerationConfig.from_model_config(config) if self.can_generate() else None
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/post_init.log', color=False, max_variable_length=2000)
     def post_init(self):
         """
         A method executed at the end of each Transformer model initialization, to execute code that needs the model's

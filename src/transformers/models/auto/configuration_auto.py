@@ -22,7 +22,7 @@ from typing import List, Union
 from ...configuration_utils import PretrainedConfig
 from ...dynamic_module_utils import get_class_from_dynamic_module
 from ...utils import CONFIG_NAME, logging
-
+import pysnooper
 
 logger = logging.get_logger(__name__)
 
@@ -808,6 +808,8 @@ class AutoConfig:
             f"Unrecognized model identifier: {model_type}. Should contain one of {', '.join(CONFIG_MAPPING.keys())}"
         )
 
+    # place after @classmethod
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/AutoConfig-from_pretrained.log', color=False, max_variable_length=2000)
     @classmethod
     @replace_list_option_in_docstrings()
     def from_pretrained(cls, pretrained_model_name_or_path, **kwargs):
