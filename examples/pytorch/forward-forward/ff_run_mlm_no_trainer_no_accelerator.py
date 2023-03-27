@@ -24,6 +24,24 @@ https://huggingface.co/models?filter=fill-mask
 
 # notion note: https://www.notion.so/xiaofengwu/run_mlm_no_trainer-py-forward-forward-n-pages-inside-d87e0cdc0f90473bbe8a271b2d8f2629?pvs=4
 
+"""
+code 思路:
+
+device = "cuda"
+model.to(device)
+
+for batch in training_dataloader:
+    optimizer.zero_grad()
+    inputs, targets = batch
+    inputs = inputs.to(device)
+    targets = targets.to(device)
+    outputs = model(inputs)
+    loss = loss_function(outputs, targets)
+    loss.backward()
+    optimizer.step()
+    scheduler.step()
+"""
+
 import argparse
 import json
 import logging
@@ -276,7 +294,9 @@ def main():
         datefmt="%m/%d/%Y %H:%M:%S",
         level=logging.INFO,
     )
+
     logger.info(accelerator.state, main_process_only=False)
+
     if accelerator.is_local_main_process:
         datasets.utils.logging.set_verbosity_warning()
         transformers.utils.logging.set_verbosity_info()
