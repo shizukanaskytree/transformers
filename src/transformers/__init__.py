@@ -200,8 +200,10 @@ _import_structure = {
     "models.bort": [],
     "models.brand_new_bert": [
         "BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP",
+        "BasicTokenizer",
         "BrandNewBertConfig",
         "BrandNewBertTokenizer",
+        "WordpieceTokenizer",
     ],
     "models.bridgetower": [
         "BRIDGETOWER_PRETRAINED_CONFIG_ARCHIVE_MAP",
@@ -1192,13 +1194,15 @@ else:
     _import_structure["models.brand_new_bert"].extend(
         [
             "BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST",
-            "BrandNewBertForCausalLM",
             "BrandNewBertForMaskedLM",
             "BrandNewBertForMultipleChoice",
+            "BrandNewBertForNextSentencePrediction",
+            "BrandNewBertForPreTraining",
             "BrandNewBertForQuestionAnswering",
             "BrandNewBertForSequenceClassification",
             "BrandNewBertForTokenClassification",
             "BrandNewBertLayer",
+            "BrandNewBertLMHeadModel",
             "BrandNewBertModel",
             "BrandNewBertPreTrainedModel",
             "load_tf_weights_in_brand_new_bert",
@@ -3832,8 +3836,10 @@ if TYPE_CHECKING:
     from .models.bloom import BLOOM_PRETRAINED_CONFIG_ARCHIVE_MAP, BloomConfig
     from .models.brand_new_bert import (
         BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
+        BasicTokenizer,
         BrandNewBertConfig,
         BrandNewBertTokenizer,
+        WordpieceTokenizer,
     )
     from .models.bridgetower import (
         BRIDGETOWER_PRETRAINED_CONFIG_ARCHIVE_MAP,
@@ -4711,13 +4717,15 @@ if TYPE_CHECKING:
         # PyTorch model imports
         from .models.brand_new_bert import (
             BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST,
-            BrandNewBertForCausalLM,
             BrandNewBertForMaskedLM,
             BrandNewBertForMultipleChoice,
+            BrandNewBertForNextSentencePrediction,
+            BrandNewBertForPreTraining,
             BrandNewBertForQuestionAnswering,
             BrandNewBertForSequenceClassification,
             BrandNewBertForTokenClassification,
             BrandNewBertLayer,
+            BrandNewBertLMHeadModel,
             BrandNewBertModel,
             BrandNewBertPreTrainedModel,
             load_tf_weights_in_brand_new_bert,

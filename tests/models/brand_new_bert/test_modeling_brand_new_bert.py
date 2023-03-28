@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Inc. team. All rights reserved.
+# Copyright 2020 The HuggingFace Team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,34 +12,43 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Testing suite for the PyTorch BrandNewBERT model. """
-
 
 import unittest
 
 from transformers import BrandNewBertConfig, is_torch_available
-from transformers.testing_utils import require_torch, slow, torch_device
+from transformers.models.auto import get_values
+from transformers.testing_utils import require_torch, require_torch_gpu, slow, torch_device
 
+from ...generation.test_utils import GenerationTesterMixin
 from ...test_configuration_common import ConfigTester
 from ...test_modeling_common import ModelTesterMixin, floats_tensor, ids_tensor, random_attention_mask
+from ...test_pipeline_mixin import PipelineTesterMixin
 
+import sys
+import tempfile
+import os
+# import pysnooper
+# import debugpy; debugpy.listen(5678); print("Waiting for debugger attach"); debugpy.wait_for_client();
+# import cProfile, pstats
 
 if is_torch_available():
     import torch
 
     from transformers import (
-        BrandNewBertForCausalLM,
+        MODEL_FOR_PRETRAINING_MAPPING,
         BrandNewBertForMaskedLM,
         BrandNewBertForMultipleChoice,
+        BrandNewBertForNextSentencePrediction,
+        BrandNewBertForPreTraining,
         BrandNewBertForQuestionAnswering,
         BrandNewBertForSequenceClassification,
         BrandNewBertForTokenClassification,
+        BrandNewBertLMHeadModel,
         BrandNewBertModel,
     )
     from transformers.models.brand_new_bert.modeling_brand_new_bert import (
         BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST,
     )
-
 
 class BrandNewBertModelTester:
     def __init__(
@@ -90,6 +99,7 @@ class BrandNewBertModelTester:
         self.num_choices = num_choices
         self.scope = scope
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers/tests/models/brand_new_bert/logs/prepare_config_and_inputs.log', color=False, max_variable_length=2000)
     def prepare_config_and_inputs(self):
         input_ids = ids_tensor([self.batch_size, self.seq_length], self.vocab_size)
 
@@ -114,6 +124,9 @@ class BrandNewBertModelTester:
         return config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
 
     def get_config(self):
+        """
+        Returns a tiny configuration by default.
+        """
         return BrandNewBertConfig(
             vocab_size=self.vocab_size,
             hidden_size=self.hidden_size,
@@ -156,16 +169,32 @@ class BrandNewBertModelTester:
             encoder_attention_mask,
         )
 
+    # @pysnooper.snoop('create_and_check_model.log', color=False, max_variable_length=1000)
     def create_and_check_model(
         self, config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
     ):
+        # import torch.onnx
+
         model = BrandNewBertModel(config=config)
         model.to(torch_device)
         model.eval()
         result = model(input_ids, attention_mask=input_mask, token_type_ids=token_type_ids)
+
+        # # export the model to ONNX format
+        # input_names = ["input_ids", "attention_mask", "token_type_ids"]
+        # output_names = ["output"]
+        # dynamic_axes = {"input_ids": {0: "batch_size", 1: "sequence_length"},
+        #                 "attention_mask": {0: "batch_size", 1: "sequence_length"},
+        #                 "token_type_ids": {0: "batch_size", 1: "sequence_length"},
+        #                 "output": {0: "batch_size", 1: "sequence_length"}}
+        # onnx_filename = "bert.onnx"
+        # torch.onnx.export(model, (input_ids, input_mask, token_type_ids), onnx_filename,
+        #                 input_names=input_names, output_names=output_names, dynamic_axes=dynamic_axes)
+
         result = model(input_ids, token_type_ids=token_type_ids)
         result = model(input_ids)
         self.parent.assertEqual(result.last_hidden_state.shape, (self.batch_size, self.seq_length, self.hidden_size))
+        self.parent.assertEqual(result.pooler_output.shape, (self.batch_size, self.hidden_size))
 
     def create_and_check_model_as_decoder(
         self,
@@ -198,6 +227,7 @@ class BrandNewBertModelTester:
         )
         result = model(input_ids, attention_mask=input_mask, token_type_ids=token_type_ids)
         self.parent.assertEqual(result.last_hidden_state.shape, (self.batch_size, self.seq_length, self.hidden_size))
+        self.parent.assertEqual(result.pooler_output.shape, (self.batch_size, self.hidden_size))
 
     def create_and_check_for_causal_lm(
         self,
@@ -211,7 +241,7 @@ class BrandNewBertModelTester:
         encoder_hidden_states,
         encoder_attention_mask,
     ):
-        model = BrandNewBertForCausalLM(config=config)
+        model = BrandNewBertLMHeadModel(config=config)
         model.to(torch_device)
         model.eval()
         result = model(input_ids, attention_mask=input_mask, token_type_ids=token_type_ids, labels=token_labels)
@@ -224,6 +254,39 @@ class BrandNewBertModelTester:
         model.to(torch_device)
         model.eval()
         result = model(input_ids, attention_mask=input_mask, token_type_ids=token_type_ids, labels=token_labels)
+        self.parent.assertEqual(result.logits.shape, (self.batch_size, self.seq_length, self.vocab_size))
+
+    def create_and_check_model_for_causal_lm_as_decoder(
+        self,
+        config,
+        input_ids,
+        token_type_ids,
+        input_mask,
+        sequence_labels,
+        token_labels,
+        choice_labels,
+        encoder_hidden_states,
+        encoder_attention_mask,
+    ):
+        config.add_cross_attention = True
+        model = BrandNewBertLMHeadModel(config=config)
+        model.to(torch_device)
+        model.eval()
+        result = model(
+            input_ids,
+            attention_mask=input_mask,
+            token_type_ids=token_type_ids,
+            labels=token_labels,
+            encoder_hidden_states=encoder_hidden_states,
+            encoder_attention_mask=encoder_attention_mask,
+        )
+        result = model(
+            input_ids,
+            attention_mask=input_mask,
+            token_type_ids=token_type_ids,
+            labels=token_labels,
+            encoder_hidden_states=encoder_hidden_states,
+        )
         self.parent.assertEqual(result.logits.shape, (self.batch_size, self.seq_length, self.vocab_size))
 
     def create_and_check_decoder_model_past_large_inputs(
@@ -240,9 +303,7 @@ class BrandNewBertModelTester:
     ):
         config.is_decoder = True
         config.add_cross_attention = True
-        model = BrandNewBertForCausalLM(config=config)
-        model.to(torch_device)
-        model.eval()
+        model = BrandNewBertLMHeadModel(config=config).to(torch_device).eval()
 
         # first forward pass
         outputs = model(
@@ -287,6 +348,36 @@ class BrandNewBertModelTester:
 
         # test that outputs are equal for slice
         self.parent.assertTrue(torch.allclose(output_from_past_slice, output_from_no_past_slice, atol=1e-3))
+
+    def create_and_check_for_next_sequence_prediction(
+        self, config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
+    ):
+        model = BrandNewBertForNextSentencePrediction(config=config)
+        model.to(torch_device)
+        model.eval()
+        result = model(
+            input_ids,
+            attention_mask=input_mask,
+            token_type_ids=token_type_ids,
+            labels=sequence_labels,
+        )
+        self.parent.assertEqual(result.logits.shape, (self.batch_size, 2))
+
+    def create_and_check_for_pretraining(
+        self, config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
+    ):
+        model = BrandNewBertForPreTraining(config=config)
+        model.to(torch_device)
+        model.eval()
+        result = model(
+            input_ids,
+            attention_mask=input_mask,
+            token_type_ids=token_type_ids,
+            labels=token_labels,
+            next_sentence_label=sequence_labels,
+        )
+        self.parent.assertEqual(result.prediction_logits.shape, (self.batch_size, self.seq_length, self.vocab_size))
+        self.parent.assertEqual(result.seq_relationship_logits.shape, (self.batch_size, 2))
 
     def create_and_check_for_question_answering(
         self, config, input_ids, token_type_ids, input_mask, sequence_labels, token_labels, choice_labels
@@ -358,14 +449,15 @@ class BrandNewBertModelTester:
 
 
 @require_torch
-class BrandNewBertModelTest(ModelTesterMixin, unittest.TestCase):
-
+class BrandNewBertModelTest(ModelTesterMixin, GenerationTesterMixin, PipelineTesterMixin, unittest.TestCase):
     all_model_classes = (
         (
             BrandNewBertModel,
+            BrandNewBertLMHeadModel,
             BrandNewBertForMaskedLM,
-            BrandNewBertForCausalLM,
             BrandNewBertForMultipleChoice,
+            BrandNewBertForNextSentencePrediction,
+            BrandNewBertForPreTraining,
             BrandNewBertForQuestionAnswering,
             BrandNewBertForSequenceClassification,
             BrandNewBertForTokenClassification,
@@ -373,55 +465,98 @@ class BrandNewBertModelTest(ModelTesterMixin, unittest.TestCase):
         if is_torch_available()
         else ()
     )
-    all_generative_model_classes = (BrandNewBertForCausalLM,) if is_torch_available() else ()
+    all_generative_model_classes = (BrandNewBertLMHeadModel,) if is_torch_available() else ()
+    pipeline_model_mapping = (
+        {
+            "feature-extraction": BrandNewBertModel,
+            "fill-mask": BrandNewBertForMaskedLM,
+            "question-answering": BrandNewBertForQuestionAnswering,
+            "text-classification": BrandNewBertForSequenceClassification,
+            "text-generation": BrandNewBertLMHeadModel,
+            "token-classification": BrandNewBertForTokenClassification,
+            "zero-shot": BrandNewBertForSequenceClassification,
+        }
+        if is_torch_available()
+        else {}
+    )
+    fx_compatible = True
+
+    # special case for ForPreTraining model
+    def _prepare_for_class(self, inputs_dict, model_class, return_labels=False):
+        inputs_dict = super()._prepare_for_class(inputs_dict, model_class, return_labels=return_labels)
+
+        if return_labels:
+            if model_class in get_values(MODEL_FOR_PRETRAINING_MAPPING):
+                inputs_dict["labels"] = torch.zeros(
+                    (self.model_tester.batch_size, self.model_tester.seq_length), dtype=torch.long, device=torch_device
+                )
+                inputs_dict["next_sentence_label"] = torch.zeros(
+                    self.model_tester.batch_size, dtype=torch.long, device=torch_device
+                )
+        return inputs_dict
 
     def setUp(self):
         self.model_tester = BrandNewBertModelTester(self)
         self.config_tester = ConfigTester(self, config_class=BrandNewBertConfig, hidden_size=37)
 
     def test_config(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         self.config_tester.run_common_tests()
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_config.prof')
+        # os.system('gprof2dot -f pstats ./test_config.prof -o ./test_config.dot')
+
     def test_model(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         self.model_tester.create_and_check_model(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model.prof')
+        # os.system('gprof2dot -f pstats ./test_model.prof -o ./test_model.dot')
+
     def test_model_various_embeddings(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs()
         for type in ["absolute", "relative_key", "relative_key_query"]:
             config_and_inputs[0].position_embedding_type = type
             self.model_tester.create_and_check_model(*config_and_inputs)
 
-    def test_for_masked_lm(self):
-        config_and_inputs = self.model_tester.prepare_config_and_inputs()
-        self.model_tester.create_and_check_for_masked_lm(*config_and_inputs)
-
-    def test_for_multiple_choice(self):
-        config_and_inputs = self.model_tester.prepare_config_and_inputs()
-        self.model_tester.create_and_check_for_multiple_choice(*config_and_inputs)
-
-    def test_decoder_model_past_with_large_inputs(self):
-        config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
-        self.model_tester.create_and_check_decoder_model_past_large_inputs(*config_and_inputs)
-
-    def test_for_question_answering(self):
-        config_and_inputs = self.model_tester.prepare_config_and_inputs()
-        self.model_tester.create_and_check_for_question_answering(*config_and_inputs)
-
-    def test_for_sequence_classification(self):
-        config_and_inputs = self.model_tester.prepare_config_and_inputs()
-        self.model_tester.create_and_check_for_sequence_classification(*config_and_inputs)
-
-    def test_for_token_classification(self):
-        config_and_inputs = self.model_tester.prepare_config_and_inputs()
-        self.model_tester.create_and_check_for_token_classification(*config_and_inputs)
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_various_embeddings.prof')
+        # os.system('gprof2dot -f pstats ./test_model_various_embeddings.prof -o ./test_model_various_embeddings.dot')
 
     def test_model_as_decoder(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
         self.model_tester.create_and_check_model_as_decoder(*config_and_inputs)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_as_decoder.prof')
+        # os.system('gprof2dot -f pstats ./test_model_as_decoder.prof -o ./test_model_as_decoder.dot')
+
     def test_model_as_decoder_with_default_input_mask(self):
         # This regression test was failing with PyTorch < 1.3
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         (
             config,
             input_ids,
@@ -448,30 +583,270 @@ class BrandNewBertModelTest(ModelTesterMixin, unittest.TestCase):
             encoder_attention_mask,
         )
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_as_decoder_with_default_input_mask.prof')
+        # os.system('gprof2dot -f pstats ./test_model_as_decoder_with_default_input_mask.prof -o ./test_model_as_decoder_with_default_input_mask.dot')
+
+    def test_for_causal_lm(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
+        self.model_tester.create_and_check_for_causal_lm(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_causal_lm.prof')
+        # os.system('gprof2dot -f pstats ./test_for_causal_lm.prof -o ./test_for_causal_lm.dot')
+
+    def test_for_masked_lm(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs()
+        self.model_tester.create_and_check_for_masked_lm(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_masked_lm.prof')
+        # os.system('gprof2dot -f pstats ./test_for_masked_lm.prof -o ./test_for_masked_lm.dot')
+
+    def test_for_causal_lm_decoder(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
+        self.model_tester.create_and_check_model_for_causal_lm_as_decoder(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_causal_lm_decoder.prof')
+        # os.system('gprof2dot -f pstats ./test_for_causal_lm_decoder.prof -o ./test_for_causal_lm_decoder.dot')
+
+    def test_decoder_model_past_with_large_inputs(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
+        self.model_tester.create_and_check_decoder_model_past_large_inputs(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_decoder_model_past_with_large_inputs.prof')
+        # os.system('gprof2dot -f pstats ./test_decoder_model_past_with_large_inputs.prof -o ./test_decoder_model_past_with_large_inputs.dot')
+
+    def test_decoder_model_past_with_large_inputs_relative_pos_emb(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs_for_decoder()
+        config_and_inputs[0].position_embedding_type = "relative_key"
+        self.model_tester.create_and_check_decoder_model_past_large_inputs(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_decoder_model_past_with_large_inputs_relative_pos_emb.prof')
+        # os.system('gprof2dot -f pstats ./test_decoder_model_past_with_large_inputs_relative_pos_emb.prof -o ./test_decoder_model_past_with_large_inputs_relative_pos_emb.dot')
+
+    def test_for_multiple_choice(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs()
+        self.model_tester.create_and_check_for_multiple_choice(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_multiple_choice.prof')
+        # os.system('gprof2dot -f pstats ./test_for_multiple_choice.prof -o ./test_for_multiple_choice.dot')
+
+    def test_for_next_sequence_prediction(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs()
+        self.model_tester.create_and_check_for_next_sequence_prediction(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_next_sequence_prediction.prof')
+        # os.system('gprof2dot -f pstats ./test_for_next_sequence_prediction.prof -o ./test_for_next_sequence_prediction.dot')
+
+    def test_for_pretraining(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs()
+        self.model_tester.create_and_check_for_pretraining(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_pretraining.prof')
+        # os.system('gprof2dot -f pstats ./test_for_pretraining.prof -o ./test_for_pretraining.dot')
+
+    def test_for_question_answering(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs()
+        self.model_tester.create_and_check_for_question_answering(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_question_answering.prof')
+        # os.system('gprof2dot -f pstats ./test_for_question_answering.prof -o ./test_for_question_answering.dot')
+
+    def test_for_sequence_classification(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs()
+        self.model_tester.create_and_check_for_sequence_classification(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_sequence_classification.prof')
+        # os.system('gprof2dot -f pstats ./test_for_sequence_classification.prof -o ./test_for_sequence_classification.dot')
+
+    def test_for_token_classification(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config_and_inputs = self.model_tester.prepare_config_and_inputs()
+        self.model_tester.create_and_check_for_token_classification(*config_and_inputs)
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_for_token_classification.prof')
+        # os.system('gprof2dot -f pstats ./test_for_token_classification.prof -o ./test_for_token_classification.dot')
+
     @slow
     def test_model_from_pretrained(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
         for model_name in BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST[:1]:
             model = BrandNewBertModel.from_pretrained(model_name)
             self.assertIsNotNone(model)
 
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_model_from_pretrained.prof')
+        # os.system('gprof2dot -f pstats ./test_model_from_pretrained.prof -o ./test_model_from_pretrained.dot')
+
+    @slow
+    @require_torch_gpu
+    def test_torchscript_device_change(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        config, inputs_dict = self.model_tester.prepare_config_and_inputs_for_common()
+        for model_class in self.all_model_classes:
+            # BertForMultipleChoice behaves incorrectly in JIT environments.
+            if model_class == BrandNewBertForMultipleChoice:
+                return
+
+            config.torchscript = True
+            model = model_class(config=config)
+
+            inputs_dict = self._prepare_for_class(inputs_dict, model_class)
+            traced_model = torch.jit.trace(
+                model, (inputs_dict["input_ids"].to("cpu"), inputs_dict["attention_mask"].to("cpu"))
+            )
+
+            with tempfile.TemporaryDirectory() as tmp:
+                torch.jit.save(traced_model, os.path.join(tmp, "bert.pt"))
+                loaded = torch.jit.load(os.path.join(tmp, "bert.pt"), map_location=torch_device)
+                loaded(inputs_dict["input_ids"].to(torch_device), inputs_dict["attention_mask"].to(torch_device))
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_torchscript_device_change.prof')
+        # os.system('gprof2dot -f pstats ./test_torchscript_device_change.prof -o ./test_torchscript_device_change.dot')
 
 @require_torch
 class BrandNewBertModelIntegrationTest(unittest.TestCase):
     @slow
-    def test_inference_masked_lm(self):
-        model = BrandNewBertForMaskedLM.from_pretrained("brand-new-bert-base-cased")
-        input_ids = torch.tensor([[0, 1, 2, 3, 4, 5]])
-        output = model(input_ids)[0]
+    def test_inference_no_head_absolute_embedding(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
 
-        # TODO Replace vocab size
-        vocab_size = 32000
-
-        expected_shape = torch.Size((1, 6, vocab_size))
+        model = BrandNewBertModel.from_pretrained("bert-base-uncased")
+        input_ids = torch.tensor([[0, 345, 232, 328, 740, 140, 1695, 69, 6078, 1588, 2]])
+        attention_mask = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+        with torch.no_grad():
+            output = model(input_ids, attention_mask=attention_mask)[0]
+        expected_shape = torch.Size((1, 11, 768))
         self.assertEqual(output.shape, expected_shape)
+        expected_slice = torch.tensor([[[0.4249, 0.1008, 0.7531], [0.3771, 0.1188, 0.7467], [0.4152, 0.1098, 0.7108]]])
 
-        # TODO Replace values below with what was printed above.
+        self.assertTrue(torch.allclose(output[:, 1:4, 1:4], expected_slice, atol=1e-4))
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_inference_no_head_absolute_embedding.prof')
+        # os.system('gprof2dot -f pstats ./test_inference_no_head_absolute_embedding.prof -o ./test_inference_no_head_absolute_embedding.dot')
+
+    @slow
+    def test_inference_no_head_relative_embedding_key(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        model = BrandNewBertModel.from_pretrained("zhiheng-huang/bert-base-uncased-embedding-relative-key")
+        input_ids = torch.tensor([[0, 345, 232, 328, 740, 140, 1695, 69, 6078, 1588, 2]])
+        attention_mask = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+        with torch.no_grad():
+            output = model(input_ids, attention_mask=attention_mask)[0]
+        expected_shape = torch.Size((1, 11, 768))
+        self.assertEqual(output.shape, expected_shape)
         expected_slice = torch.tensor(
-            [[[-0.0483, 0.1188, -0.0313], [-0.0606, 0.1435, 0.0199], [-0.0235, 0.1519, 0.0175]]]
+            [[[0.0756, 0.3142, -0.5128], [0.3761, 0.3462, -0.5477], [0.2052, 0.3760, -0.1240]]]
         )
 
-        self.assertTrue(torch.allclose(output[:, :3, :3], expected_slice, atol=1e-4))
+        self.assertTrue(torch.allclose(output[:, 1:4, 1:4], expected_slice, atol=1e-4))
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_inference_no_head_relative_embedding_key.prof')
+        # os.system('gprof2dot -f pstats ./test_inference_no_head_relative_embedding_key.prof -o ./test_inference_no_head_relative_embedding_key.dot')
+
+    @slow
+    def test_inference_no_head_relative_embedding_key_query(self):
+        # profiler = cProfile.Profile()
+        # profiler.enable()
+
+        model = BrandNewBertModel.from_pretrained("zhiheng-huang/bert-base-uncased-embedding-relative-key-query")
+        input_ids = torch.tensor([[0, 345, 232, 328, 740, 140, 1695, 69, 6078, 1588, 2]])
+        attention_mask = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+        with torch.no_grad():
+            output = model(input_ids, attention_mask=attention_mask)[0]
+        expected_shape = torch.Size((1, 11, 768))
+        self.assertEqual(output.shape, expected_shape)
+        expected_slice = torch.tensor(
+            [[[0.6496, 0.3784, 0.8203], [0.8148, 0.5656, 0.2636], [-0.0681, 0.5597, 0.7045]]]
+        )
+
+        self.assertTrue(torch.allclose(output[:, 1:4, 1:4], expected_slice, atol=1e-4))
+
+        # profiler.disable()
+        # stats = pstats.Stats(profiler) # .sort_stats('tottime')
+        # # stats.print_stats()
+        # stats.dump_stats('./test_inference_no_head_relative_embedding_key_query.prof')
+        # os.system('gprof2dot -f pstats ./test_inference_no_head_relative_embedding_key_query.prof -o ./test_inference_no_head_relative_embedding_key_query.dot')

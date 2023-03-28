@@ -85,7 +85,7 @@ require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/lang
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
-# @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/parse_args.log', color=False, max_variable_length=2000)
+# @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/logs/parse_args.log', color=False, max_variable_length=2000)
 def parse_args():
     parser = argparse.ArgumentParser(description="Finetune a transformers model on a Masked Language Modeling task")
     parser.add_argument(
@@ -269,7 +269,7 @@ def parse_args():
     return args
 
 
-# @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/main.log', color=False, max_variable_length=2000)
+# @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/logs/main.log', color=False, max_variable_length=2000)
 def main():
     args = parse_args()
 
@@ -675,7 +675,7 @@ def main():
             if completed_steps >= args.max_train_steps:
                 break
 
-            if step == 2: # for profiling
+            if step == 1: # for profiling
                 break
 
         if epoch == 1: # for profiling

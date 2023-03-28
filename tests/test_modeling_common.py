@@ -2618,6 +2618,7 @@ class ModelTesterMixin:
 
                     loss.backward()
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/logs/test_load_with_mismatched_shapes.log', color=False, max_variable_length=2000)
     def test_load_with_mismatched_shapes(self):
         if not self.test_mismatched_shapes:
             return

@@ -1323,6 +1323,7 @@ class BertForMaskedLM(BertPreTrainedModel):
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
     _keys_to_ignore_on_load_missing = [r"position_ids", r"predictions.decoder.bias", r"cls.predictions.decoder.weight"]
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/logs/BertForMaskedLM-__init__.log', color=False, max_variable_length=2000)
     def __init__(self, config):
         super().__init__(config)
 
@@ -1344,6 +1345,7 @@ class BertForMaskedLM(BertPreTrainedModel):
     def set_output_embeddings(self, new_embeddings):
         self.cls.predictions.decoder = new_embeddings
 
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/logs/BertForMaskedLM-forward.log', color=False, max_variable_length=2000)
     @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @add_code_sample_docstrings(
         checkpoint=_CHECKPOINT_FOR_DOC,

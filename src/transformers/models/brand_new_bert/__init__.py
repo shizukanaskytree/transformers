@@ -11,14 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import TYPE_CHECKING
 
-from ...utils import OptionalDependencyNotAvailable, _LazyModule, is_tokenizers_available, is_torch_available
+from ...utils import (
+    OptionalDependencyNotAvailable,
+    _LazyModule,
+    is_tokenizers_available,
+    is_torch_available,
+)
 
 
 _import_structure = {
     "configuration_brand_new_bert": ["BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP", "BrandNewBertConfig"],
-    "tokenization_brand_new_bert": ["BrandNewBertTokenizer"],
+    "tokenization_brand_new_bert": ["BasicTokenizer", "BrandNewBertTokenizer", "WordpieceTokenizer"],
 }
 
 try:
@@ -38,21 +44,24 @@ else:
     _import_structure["modeling_brand_new_bert"] = [
         "BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST",
         "BrandNewBertForMaskedLM",
-        "BrandNewBertForCausalLM",
         "BrandNewBertForMultipleChoice",
+        "BrandNewBertForNextSentencePrediction",
+        "BrandNewBertForPreTraining",
         "BrandNewBertForQuestionAnswering",
         "BrandNewBertForSequenceClassification",
         "BrandNewBertForTokenClassification",
         "BrandNewBertLayer",
+        "BrandNewBertLMHeadModel",
         "BrandNewBertModel",
         "BrandNewBertPreTrainedModel",
         "load_tf_weights_in_brand_new_bert",
     ]
 
 
+
 if TYPE_CHECKING:
     from .configuration_brand_new_bert import BRAND_NEW_BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, BrandNewBertConfig
-    from .tokenization_brand_new_bert import BrandNewBertTokenizer
+    from .tokenization_brand_new_bert import BasicTokenizer, BrandNewBertTokenizer, WordpieceTokenizer
 
     try:
         if not is_tokenizers_available():
@@ -70,13 +79,15 @@ if TYPE_CHECKING:
     else:
         from .modeling_brand_new_bert import (
             BRAND_NEW_BERT_PRETRAINED_MODEL_ARCHIVE_LIST,
-            BrandNewBertForCausalLM,
             BrandNewBertForMaskedLM,
             BrandNewBertForMultipleChoice,
+            BrandNewBertForNextSentencePrediction,
+            BrandNewBertForPreTraining,
             BrandNewBertForQuestionAnswering,
             BrandNewBertForSequenceClassification,
             BrandNewBertForTokenClassification,
             BrandNewBertLayer,
+            BrandNewBertLMHeadModel,
             BrandNewBertModel,
             BrandNewBertPreTrainedModel,
             load_tf_weights_in_brand_new_bert,

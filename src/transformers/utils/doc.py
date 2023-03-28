@@ -19,6 +19,7 @@ import functools
 import re
 import types
 
+import pysnooper
 
 def add_start_docstrings(*docstr):
     def docstring_decorator(fn):
@@ -28,6 +29,7 @@ def add_start_docstrings(*docstr):
     return docstring_decorator
 
 
+@pysnooper.snoop('/home/wxf/atom_prj/transformers/tests/models/bert/logs/add_start_docstrings_to_model_forward.log', color=False, max_variable_length=2000)
 def add_start_docstrings_to_model_forward(*docstr):
     def docstring_decorator(fn):
         docstring = "".join(docstr) + (fn.__doc__ if fn.__doc__ is not None else "")
@@ -1056,6 +1058,7 @@ def filter_outputs_from_example(docstring, **kwargs):
     return docstring
 
 
+# @pysnooper.snoop('/home/wxf/atom_prj/transformers/tests/models/bert/logs/add_code_sample_docstrings.log', color=False, max_variable_length=2000)
 def add_code_sample_docstrings(
     *docstr,
     processor_class=None,
@@ -1071,6 +1074,7 @@ def add_code_sample_docstrings(
     expected_loss=None,
     real_checkpoint=None,
 ):
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers/tests/models/bert/logs/docstring_decorator.log', color=False, max_variable_length=2000)
     def docstring_decorator(fn):
         # model_class defaults to function's class if not specified otherwise
         model_class = fn.__qualname__.split(".")[0] if model_cls is None else model_cls

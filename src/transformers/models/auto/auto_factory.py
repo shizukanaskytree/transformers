@@ -418,7 +418,7 @@ class _BaseAutoModelClass:
         )
 
     # place after the @classmethod
-    # @pysnooper.snoop('/home/wxf/atom_prj/transformers-james-calam-course/course/training/glue/_BaseAutoModelClass-from_pretrained.log', color=False, max_variable_length=2000)
+    # @pysnooper.snoop('/home/wxf/atom_prj/transformers/examples/pytorch/forward-forward/logs/_BaseAutoModelClass-from_pretrained.log', color=False, max_variable_length=2000)
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
         config = kwargs.pop("config", None)
