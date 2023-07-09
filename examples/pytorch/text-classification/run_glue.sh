@@ -2,7 +2,7 @@ export TASK_NAME=mrpc
 
 # export NCCL_SOCKET_IFNAME=lo
 # export NCCL_DEBUG=INFO
-# CUDA_VISIBLE_DEVICES=0,1
+export CUDA_VISIBLE_DEVICES=0
 
 # export NCCL_P2P_DISABLE=1
 export WANDB_MODE=offline
@@ -16,6 +16,6 @@ python run_glue.py \
   --max_seq_length 128 \
   --per_device_train_batch_size 32 \
   --learning_rate 2e-5 \
-  --num_train_epochs 3 \
+  --num_train_epochs 5 \
   --output_dir /tmp/$TASK_NAME/ \
   --overwrite_output_dir
