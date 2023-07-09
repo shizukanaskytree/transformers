@@ -205,7 +205,7 @@ class ModelArguments:
         metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
     )
 
-@pysnooper.snoop(f'main-{timestamp}.log', color=False, max_variable_length=2000)
+# @pysnooper.snoop(f'main-{timestamp}.log', color=False, max_variable_length=2000)
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
