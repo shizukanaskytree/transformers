@@ -380,6 +380,7 @@ def main():
     elif model_args.model_name_or_path:
         config = AutoConfig.from_pretrained(model_args.model_name_or_path, **config_kwargs)
     else:
+        # print(f"CONFIG NAME: {CONFIG_MAPPING}") ### CONFIG NAME: _LazyConfigMapping()
         config = CONFIG_MAPPING[model_args.model_type]()
         logger.warning("You are instantiating a new config instance from scratch.")
         if model_args.config_overrides is not None:

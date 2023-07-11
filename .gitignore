@@ -167,3 +167,11 @@ tags
 
 # ruff
 .ruff_cache
+
+examples/pytorch/language-modeling/wandb
+examples/pytorch/language-modeling/wikibook_fairseq_format
+dev/pytorch_bert/wandb
+dev/pytorch_bert/test.txt
+dev/pytorch_bert/train.txt
+dev/pytorch_bert/winequality-white.csv
+dev/pytorch_bert/pretrained-bert

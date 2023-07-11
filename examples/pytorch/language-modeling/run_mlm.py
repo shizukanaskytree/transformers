@@ -21,6 +21,13 @@ https://huggingface.co/models?filter=fill-mask
 """
 # You can also adapt this script on your own masked language modeling task. Pointers for this are left as comments.
 
+import pysnooper
+import datetime
+import os
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+log_folder = "run_mlm-py"
+os.makedirs(log_folder, exist_ok=True)
+
 import logging
 import math
 import os
@@ -224,7 +231,7 @@ class DataTrainingArguments:
                 if extension not in ["csv", "json", "txt"]:
                     raise ValueError("`validation_file` should be a csv, a json or a txt file.")
 
-
+# @pysnooper.snoop(os.path.join(log_folder, f"main-{timestamp}.log"), color=False, max_variable_length=2000)
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
