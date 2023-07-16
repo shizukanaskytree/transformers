@@ -175,3 +175,8 @@ dev/pytorch_bert/test.txt
 dev/pytorch_bert/train.txt
 dev/pytorch_bert/winequality-white.csv
 dev/pytorch_bert/pretrained-bert
+
+dev/pytorch_bert_stack_cpu/pretrained-bert
+dev/pytorch_bert_stack_cpu/wandb
+dev/pytorch_bert_stack_cpu/test.txt
+dev/pytorch_bert_stack_cpu/train.txt
