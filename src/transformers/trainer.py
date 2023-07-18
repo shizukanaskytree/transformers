@@ -19,9 +19,16 @@ The Trainer class, to easily train a 🤗 Transformers from scratch or finetune 
 import pysnooper
 import datetime
 import os
+
+current_file_path = os.path.abspath(__file__)
+file_name = os.path.splitext(os.path.basename(current_file_path))[0]
+file_extension = os.path.splitext(os.path.basename(current_file_path))[1][1:]
+log_folder = os.path.join(os.path.dirname(current_file_path), file_name + '-' + file_extension)
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-log_folder = "src/transformers/trainer-py"
+# print('log_folder: ', log_folder)
 os.makedirs(log_folder, exist_ok=True)
+
+import json
 
 import contextlib
 import copy
@@ -992,33 +999,31 @@ class Trainer:
                 },
             ]
 
+            ### 迭代所有名称
             # print('-'*80)
-            # i = 0
-            # for n, p in opt_model.named_parameters():
-            #     print(n, p.requires_grad)
-            #     i += 1
-            # print('-'*80)
+            optimizer_grouped_parameter_names = [
+                {
+                    "params": [
+                        n for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
+                    ],
+                },
+                {
+                    "params": [
+                        n for n, p in opt_model.named_parameters() if (n not in decay_parameters and p.requires_grad)
+                    ],
+                },
+            ]
 
-            ### testing
-            # print(len(optimizer_grouped_parameters[0]["params"])) # 10
-            # print(len(optimizer_grouped_parameters[1]["params"])) # 16
+            # torch.save(optimizer_grouped_parameter_names, os.path.join(output_dir, 'optimizer_grouped_parameter_names.pth'))
 
-            ### testing
-            # optimizer_grouped_parameters_names = [
-            #     {
-            #         "params": [
-            #             n for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
-            #         ]
-            #     },
-            #     {
-            #         "params": [
-            #             n for n, p in opt_model.named_parameters() if (n not in decay_parameters and p.requires_grad)
-            #         ]
-            #     },
-            # ]
-            # print('-'*80)
-            # print(optimizer_grouped_parameters_names)
-            # print('-'*80)
+            output_dir = self.args.output_dir
+            os.makedirs(output_dir, exist_ok=True)
+            logger.info(f"Saving optimizer_grouped_parameter_names checkpoint to {output_dir}")
+
+            json_path = os.path.join(output_dir, "optimiezr_grouped_parameter_names.json")
+            with open(json_path, 'w') as file:
+                json.dump(optimizer_grouped_parameter_names, file, indent=4)
+
 
             optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args)
 
