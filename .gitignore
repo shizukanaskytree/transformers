@@ -180,3 +180,6 @@ dev/pytorch_bert_stack_cpu/pretrained-bert
 dev/pytorch_bert_stack_cpu/wandb
 dev/pytorch_bert_stack_cpu/test.txt
 dev/pytorch_bert_stack_cpu/train.txt
+
+dev/pytorch_bert_stack_cpu/pretrained-bert-1-layer
+dev/pytorch_bert_stack_cpu/pretrained-bert-2-layers

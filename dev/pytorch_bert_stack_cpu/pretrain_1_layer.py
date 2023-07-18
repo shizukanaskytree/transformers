@@ -18,6 +18,7 @@ from tokenizers import BertWordPieceTokenizer
 import os
 import json
 
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 os.environ['WANDB_MODE'] = 'offline'
 # os.environ['NCCL_P2P_DISABLE'] = '1'
 # os.environ['CUDA_VISIBLE_DEVICES'] = '1'
@@ -84,7 +85,7 @@ tokenizer.train(files=files, vocab_size=vocab_size, special_tokens=special_token
 # enable truncation up to the maximum 512 tokens
 tokenizer.enable_truncation(max_length=max_length)
 
-model_path = "pretrained-bert"
+model_path = "pretrained-bert-1-layer"
 # make the directory if not already there
 if not os.path.isdir(model_path):
     os.mkdir(model_path)
@@ -210,9 +211,10 @@ trainer = Trainer(
     eval_dataset=test_dataset,
 )
 
-# train the model
-current_path = os.getcwd()  # Get the current working directory
-path_to_checkpoint_before_grow = os.path.join(current_path, "pretrained-bert", "checkpoint-1")
+### train the model
+# current_path = os.getcwd()  # Get the current working directory
+# path_to_checkpoint_before_grow = os.path.join(current_path, "pretrained-bert", "checkpoint-1")
+
 ### note 1. inside train, it will grow.
 ### note 2. inside ckpt saving, we need to save key-value mapping, param names, json file is also OK, convenient.
 trainer.train()

@@ -1,3 +1,61 @@
+import os
+import torch
+from pprint import pprint
+import copy
+
+# import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
+
+def main():
+    ckpt_folder = "./pretrained-bert-1-layer/checkpoint-1"
+    stack_ckpt_folder = "./pretrained-bert-2-layers/checkpoint-1-stack"
+
+    # Hardcoded in transformers src
+    ckpt_name = 'pytorch_model.bin'
+
+    ckpt_model_path = os.path.join(ckpt_folder, ckpt_name)
+    stack_model_path = os.path.join(stack_ckpt_folder, ckpt_name)
+    # Create the destination folder if it doesn't exist
+    if not os.path.exists(stack_ckpt_folder):
+        os.makedirs(stack_ckpt_folder)
+        print(f"Created destination folder: {stack_ckpt_folder}")
+
+    model_ckpt = torch.load(ckpt_model_path)
+    # for x in model_ckpt.keys():
+    #     print(x)
+
+    cnt_added = 0
+    new_model_ckpt = copy.deepcopy(model_ckpt)
+    extra_model_ckpt = {}
+    target_layer = 1
+    for name, p in model_ckpt.items():
+        # print(name, p.shape)
+        if 'bert.encoder.layer.0' in name:
+            cnt_added += 1
+            # Split the original string into different parts
+            parts = name.split(".")
+
+            # Update the layer number in the string
+            parts[3] = str(target_layer)
+
+            # Reconstruct the updated string
+            updated_name = ".".join(parts)
+            extra_model_ckpt[updated_name] = p.clone()
+
+    # print(f"cnt_added: {cnt_added}")
+    new_model_ckpt.update(extra_model_ckpt)
+    # print(new_model_ckpt.keys())
+    # for x in new_model_ckpt.keys():
+        # print(x)
+
+    # new_model_ckpt
+    torch.save(new_model_ckpt, stack_model_path)
+    print(f"saved to {stack_model_path}")
+
+
+if __name__ == '__main__':
+    main()
+
+
 # load the optimizer.pt from
 # /Users/wxf/Documents/prjs/2023/transformers/dev/pytorch_bert_stack_cpu/pretrained-bert/checkpoint-66/optimizer.pt
 
@@ -101,58 +159,3 @@
 #            40 'cls.predictions.transform.LayerNorm.weight',
 #            41 'cls.predictions.transform.LayerNorm.bias']}]
 # --------------------------------------------------------------------------------
-
-import os
-import torch
-import json
-from transformers.trainer_pt_utils import get_parameter_names
-from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS
-from pprint import pprint
-from transformers import BertForMaskedLM, BertConfig
-import copy
-
-# import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
-
-def main():
-    ckpt_folder = "./pretrained-bert/checkpoint-66"
-    ckpt_name = 'pytorch_model.bin'
-    stacked_ckpt_name = 'pytorch_model_stack.bin'
-
-    ckpt_model_path = os.path.join(ckpt_folder, ckpt_name)
-    stack_model_path = os.path.join(ckpt_folder, stacked_ckpt_name)
-
-    model_ckpt = torch.load(ckpt_model_path)
-    # for x in model_ckpt.keys():
-    #     print(x)
-
-    start_idx, end_idx = None, None
-    cnt_added = 0
-    new_model_ckpt = copy.deepcopy(model_ckpt)
-    extra_model_ckpt = {}
-    target_layer = 1
-    for name, p in model_ckpt.items():
-        # print(name, p.shape)
-        if 'bert.encoder.layer.0' in name:
-            cnt_added += 1
-            # Split the original string into different parts
-            parts = name.split(".")
-
-            # Update the layer number in the string
-            parts[3] = str(target_layer)
-
-            # Reconstruct the updated string
-            updated_name = ".".join(parts)
-            extra_model_ckpt[updated_name] = p.clone()
-
-    print(f"cnt_added: {cnt_added}")
-    new_model_ckpt.update(extra_model_ckpt)
-    # print(new_model_ckpt.keys())
-    for x in new_model_ckpt.keys():
-        print(x)
-
-    # new_model_ckpt
-    torch.save(new_model_ckpt, stack_model_path)
-    print(f"saved to {stack_model_path}")
-
-if __name__ == '__main__':
-    main()

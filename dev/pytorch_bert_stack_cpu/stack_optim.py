@@ -34,11 +34,16 @@ import copy
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
 def main():
-    ckpt_optim_folder = "./pretrained-bert/checkpoint-66"
+    ckpt_optim_folder = "./pretrained-bert-1-layer/checkpoint-1"
+    ckpt_optim_stack_folder = "./pretrained-bert-2-layers/checkpoint-1-stack"
+    # make dir if not exist
+    if not os.path.exists(ckpt_optim_stack_folder):
+        os.makedirs(ckpt_optim_stack_folder)
+
     optim_ckpt_name = 'optimizer.pt'
-    stack_optim_ckpt_name = 'optimizer_stack.pt'
     ckpt_optim_path = os.path.join(ckpt_optim_folder, optim_ckpt_name)
-    stack_optim_path = os.path.join(ckpt_optim_folder, stack_optim_ckpt_name)
+    stack_optim_path = os.path.join(ckpt_optim_stack_folder, optim_ckpt_name)
+
     ckpt_optim = torch.load(ckpt_optim_path)
 
     # print(ckpt_optim.keys())
@@ -49,15 +54,15 @@ def main():
     ### dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25])
     ### who to duplicate, so you know now! from where to where. but how to write the code?
 
-    parameter_names_path = "./pretrained-bert/optimiezr_grouped_parameter_names.json"
+    parameter_names_path = os.path.join("pretrained-bert-1-layer", "optimiezr_grouped_parameter_names.json")
     with open(parameter_names_path, 'r') as f:
         parameter_names_before_grow = json.load(f)
 
     # print('-'*80)
     param_names_before_grow = []
     for group in parameter_names_before_grow:
-        for param_name in group['params']:
-            # print(param_name)
+        for i, param_name in enumerate(group['params']):
+            print(i, param_name)
             param_names_before_grow.append(param_name)
     # print('-'*80)
 
@@ -154,47 +159,68 @@ def main():
             elif end_idx_without_decay is None and end_idx_with_decay is not None and (i == len(param_names_before_grow) - 1 or 'bert.encoder.layer.0' not in param_names_before_grow[i+1]):
                 end_idx_without_decay = idx
 
-    print('-'*80)
-    print('start_idx_with_decay', start_idx_with_decay, 'end_idx_with_decay', end_idx_with_decay)
-    print('start_idx_without_decay', start_idx_without_decay, 'end_idx_without_decay', end_idx_without_decay)
-    print('-'*80)
+    assert start_idx_with_decay is not None
+    assert end_idx_with_decay is not None
+    assert start_idx_without_decay is not None
+    assert end_idx_without_decay is not None
 
+    # print('-'*80)
+    # print('start_idx_with_decay', start_idx_with_decay, 'end_idx_with_decay', end_idx_with_decay)
+    # print('start_idx_without_decay', start_idx_without_decay, 'end_idx_without_decay', end_idx_without_decay)
+    # print('-'*80)
 
     # Duplicate the key-value pairs within the range
     duplicated_state = {}
     for key in range(start_idx_with_decay):
         duplicated_state[key] = copy.deepcopy(ckpt_optim['state'][key])
 
+    # display_name_tensor_shape(duplicated_state)
+
     #-----------------------------------------
+
     ### 插入新的, 但是保持原来的顺序
     for key in range(start_idx_with_decay, end_idx_with_decay + 1):
         duplicated_state[key] = copy.deepcopy(ckpt_optim['state'][key])
+
+    # display_name_tensor_shape(duplicated_state)
 
     offset_key_with_decay = end_idx_with_decay - start_idx_with_decay + 1
     for key in range(start_idx_with_decay, end_idx_with_decay + 1):
         new_key = key + offset_key_with_decay
         duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+
+    # display_name_tensor_shape(duplicated_state)
+
     #-----------------------------------------
 
     for key in range(end_idx_with_decay+1, start_idx_without_decay):
         new_key = key + offset_key_with_decay
         duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
 
+    # display_name_tensor_shape(duplicated_state)
+
     #-----------------------------------------
     ### 插入新的, 但是保持原来的顺序
     for key in range(start_idx_without_decay, end_idx_without_decay + 1):
         new_key = key + offset_key_with_decay
         duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
 
+    # display_name_tensor_shape(duplicated_state)
+
     offset_key_without_decay = end_idx_without_decay - start_idx_without_decay + 1
     for key in range(start_idx_without_decay, end_idx_without_decay + 1):
         new_key = key + offset_key_with_decay + offset_key_without_decay
         duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+
+    # display_name_tensor_shape(duplicated_state)
+
     #-----------------------------------------
 
     for key in range(end_idx_without_decay + 1, len(ckpt_optim['state'])):
         new_key = key + offset_key_with_decay + offset_key_without_decay
         duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+
+    # display_name_tensor_shape(duplicated_state)
 
     assert len(duplicated_state) == len(ckpt_optim['state']) + \
             (end_idx_with_decay - start_idx_with_decay + 1) + \
@@ -241,7 +267,7 @@ def main():
     }
 
     torch.save(duplicated_ckpt_optim, stack_optim_path)
-
+    print(f"saved to {stack_optim_path}")
 
 
 def create_optimizer_group_names(model):
@@ -271,6 +297,13 @@ def create_optimizer_group_names(model):
     ]
 
     return optimizer_grouped_parameter_names
+
+
+def display_name_tensor_shape(x):
+    print('-'*80)
+    for k, v in x.items():
+        print(k, v['exp_avg'].shape)
+    print('-'*80)
 
 
 if __name__ == '__main__':
