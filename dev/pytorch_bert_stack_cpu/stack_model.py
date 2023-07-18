@@ -23,8 +23,6 @@
 # vocab.txt
 
 
-
-
 #--------------------------------------------
 # bert.embeddings.word_embeddings.weight
 # bert.embeddings.position_embeddings.weight
@@ -55,8 +53,6 @@
 # cls.predictions.decoder.weight
 # cls.predictions.decoder.bias
 #--------------------------------------------
-
-
 
 
 # --------------------------------------------------------------------------------
@@ -106,7 +102,6 @@
 #            41 'cls.predictions.transform.LayerNorm.bias']}]
 # --------------------------------------------------------------------------------
 
-
 import os
 import torch
 import json
@@ -131,13 +126,33 @@ def main():
     #     print(x)
 
     start_idx, end_idx = None, None
-    new_model_ckpt = {}
+    cnt_added = 0
+    new_model_ckpt = copy.deepcopy(model_ckpt)
+    extra_model_ckpt = {}
+    target_layer = 1
     for name, p in model_ckpt.items():
-        print(name, p.shape)
+        # print(name, p.shape)
         if 'bert.encoder.layer.0' in name:
-            ...
+            cnt_added += 1
+            # Split the original string into different parts
+            parts = name.split(".")
 
+            # Update the layer number in the string
+            parts[3] = str(target_layer)
 
+            # Reconstruct the updated string
+            updated_name = ".".join(parts)
+            extra_model_ckpt[updated_name] = p.clone()
+
+    print(f"cnt_added: {cnt_added}")
+    new_model_ckpt.update(extra_model_ckpt)
+    # print(new_model_ckpt.keys())
+    for x in new_model_ckpt.keys():
+        print(x)
+
+    # new_model_ckpt
+    torch.save(new_model_ckpt, stack_model_path)
+    print(f"saved to {stack_model_path}")
 
 if __name__ == '__main__':
     main()
