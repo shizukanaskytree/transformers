@@ -1,2 +1,3 @@
-python stack_model.py
-python stack_optim.py
+### pretrained-bert-1-layer/checkpoint-68
+# python stack_model.py --ckpt_folder ... --stack_ckpt_folder ...
+# python stack_optim.py

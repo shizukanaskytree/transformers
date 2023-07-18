@@ -1,48 +1,33 @@
-# load the optimizer.pt from
-# /Users/wxf/Documents/prjs/2023/transformers/dev/pytorch_bert_stack_cpu/pretrained-bert/checkpoint-66/optimizer.pt
-
-# The full list is
-# config.json
-# generation_config.json
-# optimizer.pt
-# pytorch_model.bin
-# rng_state.pth
-# scheduler.pt
-# trainer_state.json
-# training_args.bin
-
-# In the following path, we also have  optimiezr_grouped_parameter_names.json which contains the parameter names for both need weight decay and no weight decay
-# The full list is:
-# (base) wxf@Xiaofengs-MacBook-Pro:~/Documents/prjs/2023/transformers/dev/pytorch_bert_stack_cpu/pretrained-bert$ ls -1
-# checkpoint-66/
-# checkpoint-67/
-# checkpoint-68/
-# config.json
-# optimiezr_grouped_parameter_names.json
-# runs/
-# vocab.txt
-
-import os
-import torch
-import json
-from transformers.trainer_pt_utils import get_parameter_names
-from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS
-from pprint import pprint
-from transformers import BertForMaskedLM, BertConfig
-import copy
-
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
+import os
+import argparse
+import copy
+from pprint import pprint
+import json
+
+import torch
+
+from transformers.trainer_pt_utils import get_parameter_names
+from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS
+from transformers import BertForMaskedLM, BertConfig
+
 def main():
-    ckpt_optim_folder = "./pretrained-bert-1-layer/checkpoint-1"
-    ckpt_optim_stack_folder = "./pretrained-bert-2-layers/checkpoint-1-stack"
+    parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
+    parser.add_argument('--ckpt_folder', required=True, help='Path to the src ckpt folder, e.g., "./pretrained-bert-1-layer/checkpoint-68"')
+    parser.add_argument('--stack_ckpt_folder', required=True, help='Path to the destination ckpt folder, "./pretrained-bert-2-layers/checkpoint-68-stack"')
+    args = parser.parse_args()
+
+    # ckpt_folder = "./pretrained-bert-1-layer/checkpoint-68" ### XXX
+    # stack_ckpt_folder = "./pretrained-bert-2-layers/checkpoint-68-stack" ### XXX
+
     # make dir if not exist
-    if not os.path.exists(ckpt_optim_stack_folder):
-        os.makedirs(ckpt_optim_stack_folder)
+    if not os.path.exists(args.stack_ckpt_folder):
+        os.makedirs(args.stack_ckpt_folder)
 
     optim_ckpt_name = 'optimizer.pt'
-    ckpt_optim_path = os.path.join(ckpt_optim_folder, optim_ckpt_name)
-    stack_optim_path = os.path.join(ckpt_optim_stack_folder, optim_ckpt_name)
+    ckpt_optim_path = os.path.join(args.ckpt_folder, optim_ckpt_name)
+    stack_optim_path = os.path.join(args.stack_ckpt_folder, optim_ckpt_name)
 
     ckpt_optim = torch.load(ckpt_optim_path)
 
@@ -62,7 +47,7 @@ def main():
     param_names_before_grow = []
     for group in parameter_names_before_grow:
         for i, param_name in enumerate(group['params']):
-            print(i, param_name)
+            # print(i, param_name)
             param_names_before_grow.append(param_name)
     # print('-'*80)
 
@@ -152,11 +137,11 @@ def main():
         if 'bert.encoder.layer.0' in name:
             if start_idx_with_decay is None:
                 start_idx_with_decay = idx
-            elif end_idx_with_decay is None and (i == len(param_names_before_grow) - 1 or 'bert.encoder.layer.0' not in param_names_before_grow[i+1]):
+            elif end_idx_with_decay is None and (i == len(param_names_before_grow) - 1 or 'bert.encoder.layer.0' not in param_names_before_grow[i+1]): ### XXX
                 end_idx_with_decay = idx
             elif start_idx_without_decay is None and end_idx_with_decay is not None:
                 start_idx_without_decay = idx
-            elif end_idx_without_decay is None and end_idx_with_decay is not None and (i == len(param_names_before_grow) - 1 or 'bert.encoder.layer.0' not in param_names_before_grow[i+1]):
+            elif end_idx_without_decay is None and end_idx_with_decay is not None and (i == len(param_names_before_grow) - 1 or 'bert.encoder.layer.0' not in param_names_before_grow[i+1]): ### XXX
                 end_idx_without_decay = idx
 
     assert start_idx_with_decay is not None
@@ -237,7 +222,7 @@ def main():
     model_config = BertConfig(
         vocab_size=vocab_size,
         max_position_embeddings=max_length,
-        num_hidden_layers=2,
+        num_hidden_layers=2,                    ### XXX
     )
     # print(f"model_config: {model_config}")
     model = BertForMaskedLM(config=model_config)
@@ -309,3 +294,27 @@ def display_name_tensor_shape(x):
 if __name__ == '__main__':
     main()
 
+
+# load the optimizer.pt from
+# /Users/wxf/Documents/prjs/2023/transformers/dev/pytorch_bert_stack_cpu/pretrained-bert/checkpoint-66/optimizer.pt
+
+# The full list is
+# config.json
+# generation_config.json
+# optimizer.pt
+# pytorch_model.bin
+# rng_state.pth
+# scheduler.pt
+# trainer_state.json
+# training_args.bin
+
+# In the following path, we also have  optimiezr_grouped_parameter_names.json which contains the parameter names for both need weight decay and no weight decay
+# The full list is:
+# (base) wxf@Xiaofengs-MacBook-Pro:~/Documents/prjs/2023/transformers/dev/pytorch_bert_stack_cpu/pretrained-bert$ ls -1
+# checkpoint-66/
+# checkpoint-67/
+# checkpoint-68/
+# config.json
+# optimiezr_grouped_parameter_names.json
+# runs/
+# vocab.txt

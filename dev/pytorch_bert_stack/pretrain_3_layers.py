@@ -18,7 +18,6 @@ from tokenizers import BertWordPieceTokenizer
 import os
 import json
 
-os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 os.environ['WANDB_MODE'] = 'offline'
 os.environ['NCCL_P2P_DISABLE'] = '1'
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
@@ -85,7 +84,9 @@ tokenizer.train(files=files, vocab_size=vocab_size, special_tokens=special_token
 # enable truncation up to the maximum 512 tokens
 tokenizer.enable_truncation(max_length=max_length)
 
-model_path = "pretrained-bert-1-layer"
+model_path = "pretrained-bert-2-layers" ### new and original
+# model_path = "pretrained-bert" ### stacked composed
+
 # make the directory if not already there
 if not os.path.isdir(model_path):
     os.mkdir(model_path)
@@ -177,7 +178,7 @@ print(len(train_dataset), len(test_dataset))
 model_config = BertConfig(
     vocab_size=vocab_size,
     max_position_embeddings=max_length,
-    num_hidden_layers=1,
+    num_hidden_layers=2,
 )
 print(f"model_config: {model_config}")
 model = BertForMaskedLM(config=model_config)
@@ -211,14 +212,13 @@ trainer = Trainer(
     eval_dataset=test_dataset,
 )
 
-### train the model
-# current_path = os.getcwd()  # Get the current working directory
-# path_to_checkpoint_before_grow = os.path.join(current_path, "pretrained-bert", "checkpoint-1")
-
+# train the model
+current_path = os.getcwd()  # Get the current working directory
+path_to_checkpoint = os.path.join(current_path, "pretrained-bert-2-layers", "checkpoint-68-stack") ### XXX
 ### note 1. inside train, it will grow.
 ### note 2. inside ckpt saving, we need to save key-value mapping, param names, json file is also OK, convenient.
-trainer.train()
-# trainer.train(resume_from_checkpoint=path_to_checkpoint_before_grow)
+# trainer.train()
+trainer.train(resume_from_checkpoint=path_to_checkpoint)
 
 ################################################################################
 

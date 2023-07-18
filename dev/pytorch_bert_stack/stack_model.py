@@ -1,23 +1,27 @@
+# import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 import os
-import torch
+import argparse
 from pprint import pprint
 import copy
 
-# import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
+import torch
 
 def main():
-    ckpt_folder = "./pretrained-bert-1-layer/checkpoint-1"
-    stack_ckpt_folder = "./pretrained-bert-2-layers/checkpoint-1-stack"
+    parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
+    parser.add_argument('--ckpt_folder', required=True, help='Path to the src ckpt folder, e.g., "./pretrained-bert-1-layer/checkpoint-68"')
+    parser.add_argument('--stack_ckpt_folder', required=True, help='Path to the destination ckpt folder, "./pretrained-bert-2-layers/checkpoint-68-stack"')
+    args = parser.parse_args()
 
     # Hardcoded in transformers src
-    ckpt_name = 'pytorch_model.bin'
+    CKPT_NAME = 'pytorch_model.bin'
 
-    ckpt_model_path = os.path.join(ckpt_folder, ckpt_name)
-    stack_model_path = os.path.join(stack_ckpt_folder, ckpt_name)
+    ckpt_model_path = os.path.join(args.ckpt_folder, CKPT_NAME)
+    stack_model_path = os.path.join(args.stack_ckpt_folder, CKPT_NAME)
+
     # Create the destination folder if it doesn't exist
-    if not os.path.exists(stack_ckpt_folder):
-        os.makedirs(stack_ckpt_folder)
-        print(f"Created destination folder: {stack_ckpt_folder}")
+    if not os.path.exists(args.stack_ckpt_folder):
+        os.makedirs(args.stack_ckpt_folder)
+        print(f"Created destination folder: {args.stack_ckpt_folder}")
 
     model_ckpt = torch.load(ckpt_model_path)
     # for x in model_ckpt.keys():
@@ -29,7 +33,7 @@ def main():
     target_layer = 1
     for name, p in model_ckpt.items():
         # print(name, p.shape)
-        if 'bert.encoder.layer.0' in name:
+        if 'bert.encoder.layer.0' in name:  ### XXX
             cnt_added += 1
             # Split the original string into different parts
             parts = name.split(".")

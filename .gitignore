@@ -190,3 +190,11 @@ dev/pytorch_bert_stack_cpu/train.txt
 
 dev/pytorch_bert_stack_cpu/pretrained-bert-1-layer
 dev/pytorch_bert_stack_cpu/pretrained-bert-2-layers
+dev/pytorch_bert_stack/pretrained-bert-1-layer/*
+
+dev/pytorch_bert_stack/test.txt
+dev/pytorch_bert_stack/train.txt
+**/checkpoint-*
+
+dev/pytorch_bert_stack/pretrained-bert-2-layers/*
+

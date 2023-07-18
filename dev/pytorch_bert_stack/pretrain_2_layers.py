@@ -10,17 +10,22 @@ Original file is located at
 # pip install datasets transformers==4.18.0 sentencepiece
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
+import os
+import argparse
+import json
+
 from datasets import load_dataset
 from transformers import BertForMaskedLM, BertConfig, DataCollatorForLanguageModeling, \
     Trainer, TrainingArguments, BertTokenizerFast, pipeline
 from tokenizers import BertWordPieceTokenizer
 
-import os
-import json
-
 os.environ['WANDB_MODE'] = 'offline'
-# os.environ['NCCL_P2P_DISABLE'] = '1'
-# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['NCCL_P2P_DISABLE'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
+parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
+parser.add_argument('--path_to_checkpoint', required=True, help='Path to the checkpoint folder')
+args = parser.parse_args()
 
 # download and prepare cc_news dataset, we select 1% for fast demo, use
 # split="train" for all training dataset
@@ -214,7 +219,7 @@ trainer = Trainer(
 
 # train the model
 current_path = os.getcwd()  # Get the current working directory
-path_to_checkpoint = os.path.join(current_path, "pretrained-bert-2-layers", "checkpoint-1-stack")
+path_to_checkpoint = os.path.join(current_path, args.path_to_checkpoint) ### XXX , "pretrained-bert-2-layers", "checkpoint-68-stack"
 ### note 1. inside train, it will grow.
 ### note 2. inside ckpt saving, we need to save key-value mapping, param names, json file is also OK, convenient.
 # trainer.train()
