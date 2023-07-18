@@ -175,3 +175,11 @@ dev/pytorch_bert/test.txt
 dev/pytorch_bert/train.txt
 dev/pytorch_bert/winequality-white.csv
 dev/pytorch_bert/pretrained-bert
+
+dev/stack-layers/wandb
+dev/stack-layers/pretrained-bert
+dev/stack-layers/train.txt
+dev/stack-layers/test.txt
+dev/stack-layers/double/doubled_checkpoints/*
+dev/stack-layers/double-ref/doubled_checkpoints/*
+

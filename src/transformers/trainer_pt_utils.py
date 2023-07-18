@@ -16,6 +16,13 @@
 Torch utilities for the Trainer class.
 """
 
+import pysnooper
+import datetime
+import os
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+log_folder = "src/transformers/trainer_pt_utils-py"
+os.makedirs(log_folder, exist_ok=True)
+
 import datetime
 import json
 import math
@@ -1052,7 +1059,7 @@ def get_model_param_count(model, trainable_only=False):
 
     return sum(numel(p) for p in model.parameters() if not trainable_only or p.requires_grad)
 
-
+# @pysnooper.snoop(os.path.join(log_folder, f"get_parameter_names-{timestamp}.log"), color=False, max_variable_length=2000)
 def get_parameter_names(model, forbidden_layer_types):
     """
     Returns the names of the model parameters that are not inside a forbidden layer.

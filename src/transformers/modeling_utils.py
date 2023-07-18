@@ -13,6 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import pysnooper
+import datetime
+import os
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+log_folder = "src/transformers/modeling_utils-py"
+os.makedirs(log_folder, exist_ok=True)
+
 import collections
 import gc
 import importlib.metadata
@@ -1651,6 +1659,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         """
         return any(hasattr(m, "gradient_checkpointing") and m.gradient_checkpointing for m in self.modules())
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"save_pretrained-{timestamp}.log"), color=False, max_variable_length=2000)
     def save_pretrained(
         self,
         save_directory: Union[str, os.PathLike],
@@ -1920,6 +1929,7 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
         else:
             return super().float(*args)
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"from_pretrained-{timestamp}.log"), color=False, max_variable_length=2000)
     @classmethod
     def from_pretrained(
         cls,

@@ -16,6 +16,13 @@
 The Trainer class, to easily train a 🤗 Transformers from scratch or finetune it on a new task.
 """
 
+import pysnooper
+import datetime
+import os
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+log_folder = "src/transformers/trainer-py"
+os.makedirs(log_folder, exist_ok=True)
+
 import contextlib
 import copy
 import functools
@@ -308,6 +315,7 @@ class Trainer:
     # Those are used as methods of the Trainer in examples.
     from .trainer_pt_utils import _get_learning_rate, log_metrics, metrics_format, save_metrics, save_state
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"__init__-{timestamp}.log"), color=False, max_variable_length=2000)
     def __init__(
         self,
         model: Union[PreTrainedModel, nn.Module] = None,
@@ -956,6 +964,7 @@ class Trainer:
             optimizer = self.optimizer
         self.create_scheduler(num_training_steps=num_training_steps, optimizer=optimizer)
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"create_optimizer-{timestamp}.log"), color=False, max_variable_length=2000)
     def create_optimizer(self):
         """
         Setup the optimizer.
@@ -983,6 +992,34 @@ class Trainer:
                 },
             ]
 
+            # print('-'*80)
+            # i = 0
+            # for n, p in opt_model.named_parameters():
+            #     print(n, p.requires_grad)
+            #     i += 1
+            # print('-'*80)
+
+            ### testing
+            # print(len(optimizer_grouped_parameters[0]["params"])) # 10
+            # print(len(optimizer_grouped_parameters[1]["params"])) # 16
+
+            ### testing
+            # optimizer_grouped_parameters_names = [
+            #     {
+            #         "params": [
+            #             n for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
+            #         ]
+            #     },
+            #     {
+            #         "params": [
+            #             n for n, p in opt_model.named_parameters() if (n not in decay_parameters and p.requires_grad)
+            #         ]
+            #     },
+            # ]
+            # print('-'*80)
+            # print(optimizer_grouped_parameters_names)
+            # print('-'*80)
+
             optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args)
 
             if self.sharded_ddp == ShardedDDPOption.SIMPLE:
@@ -1009,6 +1046,12 @@ class Trainer:
 
         if is_sagemaker_mp_enabled():
             self.optimizer = smp.DistributedOptimizer(self.optimizer)
+
+        # x = self.optimizer.state_dict()
+        # print('-'*80)
+        # print(x)
+        # ### {'state': {}, 'param_groups': [{'weight_decay': 0.0, 'lr': 5e-05, 'betas': (0.9, 0.999), 'eps': 1e-08, 'correct_bias': True, 'params': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}, {'weight_decay': 0.0, 'lr': 5e-05, 'betas': (0.9, 0.999), 'eps': 1e-08, 'correct_bias': True, 'params': [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]}]}
+        # print('-'*80)
 
         return self.optimizer
 
@@ -1455,6 +1498,7 @@ class Trainer:
 
         return model
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"train-{timestamp}.log"), color=False, max_variable_length=2000)
     def train(
         self,
         resume_from_checkpoint: Optional[Union[str, bool]] = None,
@@ -1541,6 +1585,7 @@ class Trainer:
             ignore_keys_for_eval=ignore_keys_for_eval,
         )
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"_inner_training_loop-{timestamp}.log"), color=False, max_variable_length=2000)
     def _inner_training_loop(
         self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
@@ -1985,6 +2030,7 @@ class Trainer:
             run_dir = self.args.output_dir
         return run_dir
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"_load_from_checkpoint-{timestamp}.log"), color=False, max_variable_length=2000)
     def _load_from_checkpoint(self, resume_from_checkpoint, model=None):
         if model is None:
             model = self.model
@@ -2182,6 +2228,7 @@ class Trainer:
                 f"There were unexpected keys in the checkpoint model loaded: {load_result.unexpected_keys}."
             )
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"_maybe_log_save_evaluate-{timestamp}.log"), color=False, max_variable_length=2000)
     def _maybe_log_save_evaluate(self, tr_loss, model, trial, epoch, ignore_keys_for_eval):
         if self.control.should_log:
             if is_torch_tpu_available():
@@ -2271,6 +2318,7 @@ class Trainer:
         if is_torch_tpu_available():
             xm.set_rng_state(checkpoint_rng_state["xla"])
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"_save_checkpoint-{timestamp}.log"), color=False, max_variable_length=2000)
     def _save_checkpoint(self, model, trial, metrics=None):
         # In all cases, including ddp/dp/deepspeed, self.model is always a reference to the model we
         # want to save except FullyShardedDDP.
@@ -2392,6 +2440,7 @@ class Trainer:
         if self.args.should_save:
             self._rotate_checkpoints(use_mtime=True, output_dir=run_dir)
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"_load_optimizer_and_scheduler-{timestamp}.log"), color=False, max_variable_length=2000)
     def _load_optimizer_and_scheduler(self, checkpoint):
         """If optimizer and scheduler states exist, load them."""
         if checkpoint is None:
@@ -2710,6 +2759,7 @@ class Trainer:
         else:
             return self.args.process_index == 0
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"save_model-{timestamp}.log"), color=False, max_variable_length=2000)
     def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
         """
         Will save the model, so you can reload it using `from_pretrained()`.
@@ -2793,6 +2843,7 @@ class Trainer:
         if self.tokenizer is not None and self.args.should_save:
             self.tokenizer.save_pretrained(output_dir)
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"_save-{timestamp}.log"), color=False, max_variable_length=2000)
     def _save(self, output_dir: Optional[str] = None, state_dict=None):
         # If we are executing this function, we are the process zero, so we don't check for that.
         output_dir = output_dir if output_dir is not None else self.args.output_dir
