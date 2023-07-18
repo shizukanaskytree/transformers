@@ -16,6 +16,20 @@
 The Trainer class, to easily train a 🤗 Transformers from scratch or finetune it on a new task.
 """
 
+import pysnooper
+import datetime
+import os
+
+current_file_path = os.path.abspath(__file__)
+file_name = os.path.splitext(os.path.basename(current_file_path))[0]
+file_extension = os.path.splitext(os.path.basename(current_file_path))[1][1:]
+log_folder = os.path.join(os.path.dirname(current_file_path), file_name + '-' + file_extension)
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+# print('log_folder: ', log_folder)
+os.makedirs(log_folder, exist_ok=True)
+
+import json
+
 import contextlib
 import copy
 import functools
@@ -983,6 +997,32 @@ class Trainer:
                 },
             ]
 
+            ### 迭代所有名称
+            # print('-'*80)
+            optimizer_grouped_parameter_names = [
+                {
+                    "params": [
+                        n for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
+                    ],
+                },
+                {
+                    "params": [
+                        n for n, p in opt_model.named_parameters() if (n not in decay_parameters and p.requires_grad)
+                    ],
+                },
+            ]
+
+            # torch.save(optimizer_grouped_parameter_names, os.path.join(output_dir, 'optimizer_grouped_parameter_names.pth'))
+
+            output_dir = self.args.output_dir
+            os.makedirs(output_dir, exist_ok=True)
+            logger.info(f"Saving optimizer_grouped_parameter_names checkpoint to {output_dir}")
+
+            json_path = os.path.join(output_dir, "optimiezr_grouped_parameter_names.json")
+            with open(json_path, 'w') as file:
+                json.dump(optimizer_grouped_parameter_names, file, indent=4)
+
+
             optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args)
 
             if self.sharded_ddp == ShardedDDPOption.SIMPLE:
@@ -1455,6 +1495,7 @@ class Trainer:
 
         return model
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"train-{timestamp}.log"), color=False, max_variable_length=2000)
     def train(
         self,
         resume_from_checkpoint: Optional[Union[str, bool]] = None,
@@ -2271,6 +2312,7 @@ class Trainer:
         if is_torch_tpu_available():
             xm.set_rng_state(checkpoint_rng_state["xla"])
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"_save_checkpoint-{timestamp}.log"), color=False, max_variable_length=2000)
     def _save_checkpoint(self, model, trial, metrics=None):
         # In all cases, including ddp/dp/deepspeed, self.model is always a reference to the model we
         # want to save except FullyShardedDDP.

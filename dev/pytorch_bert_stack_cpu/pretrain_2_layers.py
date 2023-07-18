@@ -19,8 +19,8 @@ import os
 import json
 
 os.environ['WANDB_MODE'] = 'offline'
-os.environ['NCCL_P2P_DISABLE'] = '1'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ['NCCL_P2P_DISABLE'] = '1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 # download and prepare cc_news dataset, we select 1% for fast demo, use
 # split="train" for all training dataset
@@ -28,11 +28,11 @@ dataset = load_dataset("cc_news", split="train[:1%]")
 
 # split the dataset into training (90%) and testing (10%)
 d = dataset.train_test_split(test_size=0.1)
-print(d["train"], d["test"])
+# print(d["train"], d["test"])
 
-for t in d["train"]["text"][:3]:
-  print(t)
-  print("="*50)
+# for t in d["train"]["text"][:3]:
+#     print(t)
+#     print("="*50)
 
 # if you have your custom dataset
 # dataset = LineByLineTextDataset(
@@ -173,7 +173,11 @@ if not truncate_longer_samples:
 print(len(train_dataset), len(test_dataset))
 
 # initialize the model with the config
-model_config = BertConfig(vocab_size=vocab_size, max_position_embeddings=max_length)
+model_config = BertConfig(
+    vocab_size=vocab_size,
+    max_position_embeddings=max_length,
+    num_hidden_layers=1,
+)
 print(f"model_config: {model_config}")
 model = BertForMaskedLM(config=model_config)
 
@@ -188,13 +192,13 @@ training_args = TrainingArguments(
     evaluation_strategy="steps",    # evaluate each `logging_steps` steps
     overwrite_output_dir=True,
     num_train_epochs=10,            # number of training epochs, feel free to tweak, original code settting is 10
-    per_device_train_batch_size=10, # the training batch size, put it as high as your GPU memory fits
-    gradient_accumulation_steps=8,  # accumulating the gradients before updating the weights
-    per_device_eval_batch_size=64,  # evaluation batch size
+    per_device_train_batch_size=1, # the training batch size, put it as high as your GPU memory fits
+    gradient_accumulation_steps=2,  # accumulating the gradients before updating the weights
+    per_device_eval_batch_size=1,  # evaluation batch size
     logging_steps=1,             # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing 1
-    save_steps=10,                   # original 1000, for debug and testing 1
+    save_steps=1,                   # original 1000, for debug and testing 1
     # load_best_model_at_end=True,  # whether to load the best model (in terms of loss) at the end of training
-    # save_total_limit=3,           # whether you don't have much space so you let only 3 model weights saved in the disk
+    save_total_limit=3,           # whether you don't have much space so you let only 3 model weights saved in the disk
 )
 
 # initialize the trainer and pass everything to it
@@ -207,27 +211,34 @@ trainer = Trainer(
 )
 
 # train the model
-trainer.train()
+current_path = os.getcwd()  # Get the current working directory
+path_to_checkpoint = os.path.join(current_path, "pretrained-bert", "checkpoint-66-stack")
+### note 1. inside train, it will grow.
+### note 2. inside ckpt saving, we need to save key-value mapping, param names, json file is also OK, convenient.
+# trainer.train()
+trainer.train(resume_from_checkpoint=path_to_checkpoint)
 
-# when you load from pretrained
-model = BertForMaskedLM.from_pretrained(os.path.join(model_path, "checkpoint-10"))
-tokenizer = BertTokenizerFast.from_pretrained(model_path)
-# or simply use pipeline
-fill_mask = pipeline("fill-mask", model=model, tokenizer=tokenizer)
+################################################################################
 
-# perform predictions
-example = "It is known that [MASK] is the capital of Germany"
-for prediction in fill_mask(example):
-    print(prediction)
+# # when you load from pretrained
+# model = BertForMaskedLM.from_pretrained(os.path.join(model_path, "checkpoint-10"))
+# tokenizer = BertTokenizerFast.from_pretrained(model_path)
+# # or simply use pipeline
+# fill_mask = pipeline("fill-mask", model=model, tokenizer=tokenizer)
 
-# perform predictions
-examples = [
-    "Today's most trending hashtags on [MASK] is Donald Trump",
-    "The [MASK] was cloudy yesterday, but today it's rainy.",
-]
-for example in examples:
-    for prediction in fill_mask(example):
-        print(f"{prediction['sequence']}, confidence: {prediction['score']}")
-    print("="*50)
+# # perform predictions
+# example = "It is known that [MASK] is the capital of Germany"
+# for prediction in fill_mask(example):
+#     print(prediction)
+
+# # perform predictions
+# examples = [
+#     "Today's most trending hashtags on [MASK] is Donald Trump",
+#     "The [MASK] was cloudy yesterday, but today it's rainy.",
+# ]
+# for example in examples:
+#     for prediction in fill_mask(example):
+#         print(f"{prediction['sequence']}, confidence: {prediction['score']}")
+#     print("="*50)
 
 # !nvidia-smi
