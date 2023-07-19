@@ -10,18 +10,24 @@ Original file is located at
 # pip install datasets transformers==4.18.0 sentencepiece
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
+import os
+import argparse
+import json
+import glob
+
 from datasets import load_dataset
 from transformers import BertForMaskedLM, BertConfig, DataCollatorForLanguageModeling, \
     Trainer, TrainingArguments, BertTokenizerFast, pipeline
 from tokenizers import BertWordPieceTokenizer
 
-import os
-import json
-
-os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 os.environ['WANDB_MODE'] = 'offline'
 os.environ['NCCL_P2P_DISABLE'] = '1'
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
+parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
+parser.add_argument('--path_to_ckpts', default="", required=False, help='Path to the checkpoint folder')
+parser.add_argument('--num_hidden_layers', required=True, type=int, help='The number of layers in the stacked model, e.g., 2')
+args = parser.parse_args()
 
 # download and prepare cc_news dataset, we select 1% for fast demo, use
 # split="train" for all training dataset
@@ -85,17 +91,16 @@ tokenizer.train(files=files, vocab_size=vocab_size, special_tokens=special_token
 # enable truncation up to the maximum 512 tokens
 tokenizer.enable_truncation(max_length=max_length)
 
-model_path = "pretrained-bert-1-layer"
-# make the directory if not already there
-if not os.path.isdir(model_path):
-    os.mkdir(model_path)
+ckpts_path = f"pretrained-bert-{args.num_hidden_layers}-layers"
+if not os.path.isdir(ckpts_path):
+    os.mkdir(ckpts_path)
 
 # save the tokenizer
-tokenizer.save_model(model_path)
+tokenizer.save_model(ckpts_path)
 
 # dumping some of the tokenizer config to config file,
 # including special tokens, whether to lower case and the maximum sequence length
-with open(os.path.join(model_path, "config.json"), "w") as f:
+with open(os.path.join(ckpts_path, "config.json"), "w") as f:
     tokenizer_cfg = {
         "do_lower_case": True,
         "unk_token": "[UNK]",
@@ -109,7 +114,7 @@ with open(os.path.join(model_path, "config.json"), "w") as f:
     json.dump(tokenizer_cfg, f)
 
 # when the tokenizer is trained and configured, load it as BertTokenizerFast
-tokenizer = BertTokenizerFast.from_pretrained(model_path)
+tokenizer = BertTokenizerFast.from_pretrained(ckpts_path)
 
 def encode_with_truncation(examples):
     """Mapping function to tokenize the sentences passed with truncation"""
@@ -177,7 +182,7 @@ print(len(train_dataset), len(test_dataset))
 model_config = BertConfig(
     vocab_size=vocab_size,
     max_position_embeddings=max_length,
-    num_hidden_layers=1,
+    num_hidden_layers=args.num_hidden_layers,
 )
 print(f"model_config: {model_config}")
 model = BertForMaskedLM(config=model_config)
@@ -189,7 +194,7 @@ data_collator = DataCollatorForLanguageModeling(
 )
 
 training_args = TrainingArguments(
-    output_dir=model_path,          # output directory to where save model checkpoint
+    output_dir=ckpts_path,          # output directory to where save model checkpoint
     evaluation_strategy="steps",    # evaluate each `logging_steps` steps
     overwrite_output_dir=True,
     num_train_epochs=10,            # number of training epochs, feel free to tweak, original code settting is 10
@@ -211,20 +216,23 @@ trainer = Trainer(
     eval_dataset=test_dataset,
 )
 
-### train the model
-# current_path = os.getcwd()  # Get the current working directory
-# path_to_checkpoint_before_grow = os.path.join(current_path, "pretrained-bert", "checkpoint-1")
+# train the model
+current_path = os.getcwd()  # Get the current working directory
+path_to_ckpts = os.path.join(current_path, args.path_to_ckpts) ### XXX , "pretrained-bert-2-layers", "checkpoint-68-stack"
 
-### note 1. inside train, it will grow.
-### note 2. inside ckpt saving, we need to save key-value mapping, param names, json file is also OK, convenient.
-trainer.train()
-# trainer.train(resume_from_checkpoint=path_to_checkpoint_before_grow)
+pattern = 'checkpoint-*-stacked'
+stacked_ckpt_dir = glob.glob(f'{path_to_ckpts}/{pattern}')
+# print(f"stacked_ckpt_dir: {stacked_ckpt_dir}")
+if len(stacked_ckpt_dir) == 0:
+    trainer.train()
+else:
+    trainer.train(resume_from_checkpoint=stacked_ckpt_dir[0])
 
 ################################################################################
 
 # # when you load from pretrained
-# model = BertForMaskedLM.from_pretrained(os.path.join(model_path, "checkpoint-10"))
-# tokenizer = BertTokenizerFast.from_pretrained(model_path)
+# model = BertForMaskedLM.from_pretrained(os.path.join(ckpts_path, "checkpoint-10"))
+# tokenizer = BertTokenizerFast.from_pretrained(ckpts_path)
 # # or simply use pipeline
 # fill_mask = pipeline("fill-mask", model=model, tokenizer=tokenizer)
 

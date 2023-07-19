@@ -196,5 +196,5 @@ dev/pytorch_bert_stack/test.txt
 dev/pytorch_bert_stack/train.txt
 **/checkpoint-*
 
-dev/pytorch_bert_stack/pretrained-bert-2-layers/*
-
+dev/pytorch_bert_stack/pretrained-bert-*-layers/*
+dev/pytorch_bert_stack/wandb

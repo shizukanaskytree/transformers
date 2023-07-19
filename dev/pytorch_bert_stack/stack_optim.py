@@ -12,34 +12,48 @@ from transformers.trainer_pt_utils import get_parameter_names
 from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS
 from transformers import BertForMaskedLM, BertConfig
 
+from utils import find_second_largest_checkpoint
+
 def main():
     parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
-    parser.add_argument('--ckpt_folder', required=True, help='Path to the src ckpt folder, e.g., "./pretrained-bert-1-layer/checkpoint-68"')
-    parser.add_argument('--stack_ckpt_folder', required=True, help='Path to the destination ckpt folder, "./pretrained-bert-2-layers/checkpoint-68-stack"')
+    parser.add_argument('--src_ckpts_folder', required=True, help='Path to the src ckpt folder, e.g., "./pretrained-bert-1-layer"')
+    parser.add_argument('--stacked_ckpts_folder', required=True, help='Path to the destination ckpt folder, "./pretrained-bert-2-layers"')
+    parser.add_argument('--to_be_copied_layer_num', required=True, type=int, help='The number of layers in the stacked model, e.g., 2')
     args = parser.parse_args()
 
-    # ckpt_folder = "./pretrained-bert-1-layer/checkpoint-68" ### XXX
-    # stack_ckpt_folder = "./pretrained-bert-2-layers/checkpoint-68-stack" ### XXX
+    num_second_largest_checkpoint, second_largest_checkpoint_path = \
+        find_second_largest_checkpoint(args.src_ckpts_folder)
 
-    # make dir if not exist
-    if not os.path.exists(args.stack_ckpt_folder):
-        os.makedirs(args.stack_ckpt_folder)
+    OPTIM_CKPT_NAME = 'optimizer.pt'
+    src_optim_ckpt_path = os.path.join(second_largest_checkpoint_path, OPTIM_CKPT_NAME)
 
-    optim_ckpt_name = 'optimizer.pt'
-    ckpt_optim_path = os.path.join(args.ckpt_folder, optim_ckpt_name)
-    stack_optim_path = os.path.join(args.stack_ckpt_folder, optim_ckpt_name)
+    stacked_optim_ckpt_path = os.path.join(args.stacked_ckpts_folder,
+                                           f"checkpoint-{num_second_largest_checkpoint}-stacked")
 
-    ckpt_optim = torch.load(ckpt_optim_path)
+    stacked_ckpt_model_filename = os.path.join(args.stacked_ckpts_folder,
+                                               f"checkpoint-{num_second_largest_checkpoint}-stacked",
+                                               OPTIM_CKPT_NAME)
 
-    # print(ckpt_optim.keys())
+    # Create the destination folder if it doesn't exist
+    if not os.path.exists(stacked_optim_ckpt_path):
+        os.makedirs(stacked_optim_ckpt_path)
+        print(f"Created destination folder: {stacked_optim_ckpt_path}")
+
+    ### src_optim_ckpt
+    src_optim_ckpt = torch.load(src_optim_ckpt_path)
+
+    # print(src_optim_ckpt.keys())
     ### dict_keys(['state', 'param_groups'])
 
-    # print(ckpt_optim['state'].keys())
-    ckpt_optim_idx = list(ckpt_optim['state'].keys())
+    # print(src_optim_ckpt['state'].keys())
+    ckpt_optim_idx = list(src_optim_ckpt['state'].keys())
     ### dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25])
     ### who to duplicate, so you know now! from where to where. but how to write the code?
 
-    parameter_names_path = os.path.join("pretrained-bert-1-layer", "optimiezr_grouped_parameter_names.json")
+    ### XXX, e.g., "pretrained-bert-1-layer/optimiezr_grouped_parameter_names.json"
+    ### split the args.src_ckpts_folder and get [0]
+    ### parameter_names_path = os.path.join("pretrained-bert-1-layer", "optimiezr_grouped_parameter_names.json")
+    parameter_names_path = os.path.join(args.src_ckpts_folder.split('/')[0], "optimiezr_grouped_parameter_names.json")
     with open(parameter_names_path, 'r') as f:
         parameter_names_before_grow = json.load(f)
 
@@ -50,6 +64,52 @@ def main():
             # print(i, param_name)
             param_names_before_grow.append(param_name)
     # print('-'*80)
+
+    # --------------------------------------------------------------------------
+    # 00: 'bert.embeddings.word_embeddings.weight'
+    # 01: 'bert.embeddings.position_embeddings.weight'
+    # 02: 'bert.embeddings.token_type_embeddings.weight'
+    # 03: 'bert.encoder.layer.0.attention.self.query.weight'
+    # 04: 'bert.encoder.layer.0.attention.self.key.weight'
+    # 05: 'bert.encoder.layer.0.attention.self.value.weight'
+    # 06: 'bert.encoder.layer.0.attention.output.dense.weight'
+    # 07: 'bert.encoder.layer.0.intermediate.dense.weight'
+    # 08: 'bert.encoder.layer.0.output.dense.weight'
+    # 09: 'bert.encoder.layer.1.attention.self.query.weight' <-- this is the start to duplicate
+    # 10: 'bert.encoder.layer.1.attention.self.key.weight'
+    # 11: 'bert.encoder.layer.1.attention.self.value.weight'
+    # 12: 'bert.encoder.layer.1.attention.output.dense.weight'
+    # 13: 'bert.encoder.layer.1.intermediate.dense.weight'
+    # 14: 'bert.encoder.layer.1.output.dense.weight'         <-- this is the end to duplicate
+    # 15: 'cls.predictions.transform.dense.weight'
+    # 16: 'bert.embeddings.LayerNorm.weight'
+    # 17: 'bert.embeddings.LayerNorm.bias'
+    # 18: 'bert.encoder.layer.0.attention.self.query.bias'
+    # 19: 'bert.encoder.layer.0.attention.self.key.bias'
+    # 20: 'bert.encoder.layer.0.attention.self.value.bias'
+    # 21: 'bert.encoder.layer.0.attention.output.dense.bias'
+    # 22: 'bert.encoder.layer.0.attention.output.LayerNorm.weight'
+    # 23: 'bert.encoder.layer.0.attention.output.LayerNorm.bias'
+    # 24: 'bert.encoder.layer.0.intermediate.dense.bias'
+    # 25: 'bert.encoder.layer.0.output.dense.bias'
+    # 26: 'bert.encoder.layer.0.output.LayerNorm.weight'
+    # 27: 'bert.encoder.layer.0.output.LayerNorm.bias'
+    # 28: 'bert.encoder.layer.1.attention.self.query.bias'      <-- this is the start to duplicate
+    # 29: 'bert.encoder.layer.1.attention.self.key.bias'
+    # 30: 'bert.encoder.layer.1.attention.self.value.bias'
+    # 31: 'bert.encoder.layer.1.attention.output.dense.bias'
+    # 32: 'bert.encoder.layer.1.attention.output.LayerNorm.weight'
+    # 33: 'bert.encoder.layer.1.attention.output.LayerNorm.bias'
+    # 34: 'bert.encoder.layer.1.intermediate.dense.bias'
+    # 35: 'bert.encoder.layer.1.output.dense.bias'
+    # 36: 'bert.encoder.layer.1.output.LayerNorm.weight'
+    # 37: 'bert.encoder.layer.1.output.LayerNorm.bias'          <-- this is the end to duplicate
+    # 38: 'cls.predictions.bias'
+    # 39: 'cls.predictions.transform.dense.bias'
+    # 40: 'cls.predictions.transform.LayerNorm.weight'
+    # 41: 'cls.predictions.transform.LayerNorm.bias'
+    # --------------------------------------------------------------------------
+
 
     # --------------------------------------------------------------------------------
     # 0  bert.embeddings.word_embeddings.weight
@@ -133,15 +193,18 @@ def main():
     start_idx_with_decay, end_idx_with_decay = None, None
     start_idx_without_decay, end_idx_without_decay = None, None
 
+    to_be_copied_layer_num = "bert.encoder.layer." + str(args.to_be_copied_layer_num)
+    print(f"to copy layer name: {to_be_copied_layer_num}")
+
     for i, (name, idx) in enumerate(zip(param_names_before_grow, ckpt_optim_idx)):
-        if 'bert.encoder.layer.0' in name:
+        if to_be_copied_layer_num in name: ### XXX
             if start_idx_with_decay is None:
                 start_idx_with_decay = idx
-            elif end_idx_with_decay is None and (i == len(param_names_before_grow) - 1 or 'bert.encoder.layer.0' not in param_names_before_grow[i+1]): ### XXX
+            elif end_idx_with_decay is None and (i == len(param_names_before_grow) - 1 or to_be_copied_layer_num not in param_names_before_grow[i+1]): ### XXX
                 end_idx_with_decay = idx
             elif start_idx_without_decay is None and end_idx_with_decay is not None:
                 start_idx_without_decay = idx
-            elif end_idx_without_decay is None and end_idx_with_decay is not None and (i == len(param_names_before_grow) - 1 or 'bert.encoder.layer.0' not in param_names_before_grow[i+1]): ### XXX
+            elif end_idx_without_decay is None and end_idx_with_decay is not None and (i == len(param_names_before_grow) - 1 or to_be_copied_layer_num not in param_names_before_grow[i+1]): ### XXX
                 end_idx_without_decay = idx
 
     assert start_idx_with_decay is not None
@@ -157,22 +220,22 @@ def main():
     # Duplicate the key-value pairs within the range
     duplicated_state = {}
     for key in range(start_idx_with_decay):
-        duplicated_state[key] = copy.deepcopy(ckpt_optim['state'][key])
+        duplicated_state[key] = copy.deepcopy(src_optim_ckpt['state'][key])
 
     # display_name_tensor_shape(duplicated_state)
 
     #-----------------------------------------
 
-    ### 插入新的, 但是保持原来的顺序
+    ### 插入新的, 但是保持原来的顺序; Insert new ones, but keep the original order
     for key in range(start_idx_with_decay, end_idx_with_decay + 1):
-        duplicated_state[key] = copy.deepcopy(ckpt_optim['state'][key])
+        duplicated_state[key] = copy.deepcopy(src_optim_ckpt['state'][key])
 
     # display_name_tensor_shape(duplicated_state)
 
     offset_key_with_decay = end_idx_with_decay - start_idx_with_decay + 1
     for key in range(start_idx_with_decay, end_idx_with_decay + 1):
         new_key = key + offset_key_with_decay
-        duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+        duplicated_state[new_key] = copy.deepcopy(src_optim_ckpt['state'][key])
 
     # display_name_tensor_shape(duplicated_state)
 
@@ -180,34 +243,34 @@ def main():
 
     for key in range(end_idx_with_decay+1, start_idx_without_decay):
         new_key = key + offset_key_with_decay
-        duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+        duplicated_state[new_key] = copy.deepcopy(src_optim_ckpt['state'][key])
 
     # display_name_tensor_shape(duplicated_state)
 
     #-----------------------------------------
-    ### 插入新的, 但是保持原来的顺序
+    ### 插入新的, 但是保持原来的顺序; Insert new ones, but keep the original order
     for key in range(start_idx_without_decay, end_idx_without_decay + 1):
         new_key = key + offset_key_with_decay
-        duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+        duplicated_state[new_key] = copy.deepcopy(src_optim_ckpt['state'][key])
 
     # display_name_tensor_shape(duplicated_state)
 
     offset_key_without_decay = end_idx_without_decay - start_idx_without_decay + 1
     for key in range(start_idx_without_decay, end_idx_without_decay + 1):
         new_key = key + offset_key_with_decay + offset_key_without_decay
-        duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+        duplicated_state[new_key] = copy.deepcopy(src_optim_ckpt['state'][key])
 
     # display_name_tensor_shape(duplicated_state)
 
     #-----------------------------------------
 
-    for key in range(end_idx_without_decay + 1, len(ckpt_optim['state'])):
+    for key in range(end_idx_without_decay + 1, len(src_optim_ckpt['state'])):
         new_key = key + offset_key_with_decay + offset_key_without_decay
-        duplicated_state[new_key] = copy.deepcopy(ckpt_optim['state'][key])
+        duplicated_state[new_key] = copy.deepcopy(src_optim_ckpt['state'][key])
 
     # display_name_tensor_shape(duplicated_state)
 
-    assert len(duplicated_state) == len(ckpt_optim['state']) + \
+    assert len(duplicated_state) == len(src_optim_ckpt['state']) + \
             (end_idx_with_decay - start_idx_with_decay + 1) + \
             (end_idx_without_decay - start_idx_without_decay + 1)
 
@@ -222,7 +285,7 @@ def main():
     model_config = BertConfig(
         vocab_size=vocab_size,
         max_position_embeddings=max_length,
-        num_hidden_layers=2,                    ### XXX
+        num_hidden_layers=args.to_be_copied_layer_num+2, ### XXX, offset by 2, we get num_hidden_layers from to_be_copied_layer_num
     )
     # print(f"model_config: {model_config}")
     model = BertForMaskedLM(config=model_config)
@@ -241,18 +304,18 @@ def main():
 
     # print(param_groups_idx)
 
-    new_param_groups = copy.deepcopy(ckpt_optim['param_groups'])
+    new_param_groups = copy.deepcopy(src_optim_ckpt['param_groups'])
     for i, param_group in enumerate(new_param_groups):
         param_group['params'] = param_groups_idx[i]
 
-    # Create the duplicated ckpt_optim
+    # Create the duplicated src_optim_ckpt
     duplicated_ckpt_optim = {
         'state': duplicated_state,
         'param_groups': new_param_groups,
     }
 
-    torch.save(duplicated_ckpt_optim, stack_optim_path)
-    print(f"saved to {stack_optim_path}")
+    torch.save(duplicated_ckpt_optim, stacked_ckpt_model_filename)
+    print(f"Saved to {stacked_ckpt_model_filename}")
 
 
 def create_optimizer_group_names(model):

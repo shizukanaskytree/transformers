@@ -6,34 +6,50 @@ import copy
 
 import torch
 
+from utils import find_second_largest_checkpoint
+
 def main():
     parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
-    parser.add_argument('--ckpt_folder', required=True, help='Path to the src ckpt folder, e.g., "./pretrained-bert-1-layer/checkpoint-68"')
-    parser.add_argument('--stack_ckpt_folder', required=True, help='Path to the destination ckpt folder, "./pretrained-bert-2-layers/checkpoint-68-stack"')
+    parser.add_argument('--src_ckpts_folder', required=True, help='Path to the src ckpt folder, e.g., "./pretrained-bert-1-layer"')
+    parser.add_argument('--stacked_ckpts_folder', required=True, help='Path to the destination ckpt folder, "./pretrained-bert-2-layers/checkpoint-68-stack"')
+    parser.add_argument('--to_be_copied_layer_num', required=True, type=int, help='The number of layers in the stacked model, e.g., 2')
     args = parser.parse_args()
 
     # Hardcoded in transformers src
-    CKPT_NAME = 'pytorch_model.bin'
+    MODEL_CKPT_NAME = 'pytorch_model.bin'
 
-    ckpt_model_path = os.path.join(args.ckpt_folder, CKPT_NAME)
-    stack_model_path = os.path.join(args.stack_ckpt_folder, CKPT_NAME)
+    # 4, pretrained-bert-1-layer/checkpoint-4
+    num_second_largest_checkpoint, second_largest_checkpoint_path = \
+        find_second_largest_checkpoint(args.src_ckpts_folder)
+    second_largest_checkpoint_path = os.path.join(args.src_ckpts_folder, f"checkpoint-{num_second_largest_checkpoint}")
+
+    model_ckpt_path = os.path.join(second_largest_checkpoint_path, MODEL_CKPT_NAME)
+    stacked_ckpt_model_path = os.path.join(args.stacked_ckpts_folder,
+                                           f"checkpoint-{num_second_largest_checkpoint}-stacked")
+    stacked_ckpt_model_filename = os.path.join(args.stacked_ckpts_folder,
+                                               f"checkpoint-{num_second_largest_checkpoint}-stacked",
+                                               MODEL_CKPT_NAME)
 
     # Create the destination folder if it doesn't exist
-    if not os.path.exists(args.stack_ckpt_folder):
-        os.makedirs(args.stack_ckpt_folder)
-        print(f"Created destination folder: {args.stack_ckpt_folder}")
+    if not os.path.exists(stacked_ckpt_model_path):
+        os.makedirs(stacked_ckpt_model_path)
+        print(f"Created destination folder: {stacked_ckpt_model_path}")
 
-    model_ckpt = torch.load(ckpt_model_path)
+    model_ckpt = torch.load(model_ckpt_path)
     # for x in model_ckpt.keys():
     #     print(x)
 
     cnt_added = 0
     new_model_ckpt = copy.deepcopy(model_ckpt)
+
     extra_model_ckpt = {}
-    target_layer = 1
+
+    # to be copied (duplicated) layer number
+    target_layer = args.to_be_copied_layer_num + 1
+
     for name, p in model_ckpt.items():
         # print(name, p.shape)
-        if 'bert.encoder.layer.0' in name:  ### XXX
+        if ("bert.encoder.layer." + str(args.to_be_copied_layer_num)) in name:  ### XXX, e.g., 'bert.encoder.layer.0'
             cnt_added += 1
             # Split the original string into different parts
             parts = name.split(".")
@@ -52,8 +68,8 @@ def main():
         # print(x)
 
     # new_model_ckpt
-    torch.save(new_model_ckpt, stack_model_path)
-    print(f"saved to {stack_model_path}")
+    torch.save(new_model_ckpt, stacked_ckpt_model_filename)
+    print(f"saved to {stacked_ckpt_model_filename}")
 
 
 if __name__ == '__main__':
