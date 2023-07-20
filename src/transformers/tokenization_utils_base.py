@@ -18,6 +18,16 @@ fronting encoding methods) Special token mixing (host the special tokens logic) 
 of output with special method for the Fast tokenizers)
 """
 
+import pysnooper
+import datetime
+import os
+current_file_path = os.path.abspath(__file__)
+file_name = os.path.splitext(os.path.basename(current_file_path))[0]
+file_extension = os.path.splitext(os.path.basename(current_file_path))[1][1:]
+log_folder = os.path.join(os.path.dirname(current_file_path), file_name + '-' + file_extension)
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+os.makedirs(log_folder, exist_ok=True)
+
 import copy
 import json
 import os
@@ -1614,6 +1624,7 @@ class PreTrainedTokenizerBase(SpecialTokensMixin, PushToHubMixin):
         """
         raise NotImplementedError()
 
+    # @pysnooper.snoop(os.path.join(log_folder, f"from_pretrained-{timestamp}.log"), color=False, max_variable_length=2000)
     @classmethod
     def from_pretrained(
         cls,

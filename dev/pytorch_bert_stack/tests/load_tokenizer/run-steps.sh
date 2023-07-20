@@ -1,0 +1,1 @@
+python load_tokenizer_from_unofficial_config_json.py --num_hidden_layers 1

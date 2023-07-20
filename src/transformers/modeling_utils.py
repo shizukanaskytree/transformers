@@ -17,8 +17,11 @@
 import pysnooper
 import datetime
 import os
+current_file_path = os.path.abspath(__file__)
+file_name = os.path.splitext(os.path.basename(current_file_path))[0]
+file_extension = os.path.splitext(os.path.basename(current_file_path))[1][1:]
+log_folder = os.path.join(os.path.dirname(current_file_path), file_name + '-' + file_extension)
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-log_folder = "src/transformers/modeling_utils-py"
 os.makedirs(log_folder, exist_ok=True)
 
 import collections

@@ -168,15 +168,12 @@ tags
 # ruff
 .ruff_cache
 
-examples/pytorch/language-modeling/wandb
 examples/pytorch/language-modeling/wikibook_fairseq_format
-dev/pytorch_bert/wandb
 dev/pytorch_bert/test.txt
 dev/pytorch_bert/train.txt
 dev/pytorch_bert/winequality-white.csv
 dev/pytorch_bert/pretrained-bert
 
-dev/stack-layers/wandb
 dev/stack-layers/pretrained-bert
 dev/stack-layers/train.txt
 dev/stack-layers/test.txt
@@ -184,7 +181,6 @@ dev/stack-layers/double/doubled_checkpoints/*
 dev/stack-layers/double-ref/doubled_checkpoints/*
 
 dev/pytorch_bert_stack_cpu/pretrained-bert
-dev/pytorch_bert_stack_cpu/wandb
 dev/pytorch_bert_stack_cpu/test.txt
 dev/pytorch_bert_stack_cpu/train.txt
 
@@ -197,4 +193,12 @@ dev/pytorch_bert_stack/train.txt
 **/checkpoint-*
 
 dev/pytorch_bert_stack/pretrained-bert-*-layers/*
-dev/pytorch_bert_stack/wandb
+
+**/wandb/*
+
+dev/pytorch_bert_stack/tests/load_tokenizer/pretrained-bert-*-layers/*
+dev/pytorch_bert_stack/tests/save_tokenizer/pretrained-bert-*-layers/*
+dev/pytorch_bert_stack/tests/load_tokenizer/test.txt
+dev/pytorch_bert_stack/tests/load_tokenizer/train.txt
+dev/pytorch_bert_stack/tests/save_tokenizer/test.txt
+dev/pytorch_bert_stack/tests/save_tokenizer/train.txt
