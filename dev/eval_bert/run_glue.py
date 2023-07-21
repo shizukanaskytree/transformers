@@ -48,7 +48,7 @@ from transformers.utils.versions import require_version
 
 os.environ["WANDB_MODE"] = "offline"
 os.environ['NCCL_P2P_DISABLE'] = '1'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.31.0.dev0")

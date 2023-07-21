@@ -16,10 +16,11 @@ from datasets import load_dataset
 from transformers import BertForMaskedLM, BertConfig, DataCollatorForLanguageModeling, \
     Trainer, TrainingArguments, BertTokenizerFast, pipeline
 from tokenizers import BertWordPieceTokenizer
+from datasets import concatenate_datasets, load_dataset
 
 # os.environ['WANDB_MODE'] = 'offline'
 os.environ['NCCL_P2P_DISABLE'] = '1'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
 parser.add_argument('--path_to_ckpts', default="", required=False, help='Path to the checkpoint folder')
@@ -28,9 +29,15 @@ args = parser.parse_args()
 
 ################################################################################
 
+bookcorpus = load_dataset("bookcorpus", split="train")
+wiki = load_dataset("wikipedia", "20220301.en", split="train")
+wiki = wiki.remove_columns([col for col in wiki.column_names if col != "text"])  # only keep the 'text' column
+assert bookcorpus.features.type == wiki.features.type
+dataset = concatenate_datasets([bookcorpus, wiki])
+
 ### download and prepare cc_news dataset, we select 1% for fast demo, use
 ### split="train" for all training dataset
-dataset = load_dataset("cc_news", split="train[:1%]")
+# dataset = load_dataset("cc_news", split="train[:1%]")
 
 ### split the dataset into training (90%) and testing (10%)
 d = dataset.train_test_split(test_size=0.1)
