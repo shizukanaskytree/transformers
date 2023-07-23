@@ -1,11 +1,25 @@
 import os
-from huggingface_hub import notebook_login
-from transformers import BertTokenizerFast, AutoTokenizer
+from os.path import expanduser, join
 
-#------------------------------------------------------------------------------#
+from dotenv import load_dotenv
+from global_constants import ckpts_path, remote_hub_ckpts_path
+from huggingface_hub import login
+
+from transformers import AutoTokenizer, BertTokenizerFast
+
+
+### Get the absolute path to the .env file in the user's home directory
+dotenv_path = join(expanduser("~"), ".env")
+### Load environment variables from .env file
+load_dotenv(dotenv_path)
+
+### Get the token from the environment variables
+token = os.getenv("HUGGINGFACE_TOKEN")
 
 ### login to huggingface hub in the terminal EVERYTIME! [passed]: huggingface-cli login
 # notebook_login()
+### https://huggingface.co/docs/huggingface_hub/quick-start
+login(token=token)
 
 ### (py311) xiaofeng.wu@Fairfax4way04RTX4090:/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack$ huggingface-cli login
 ##
@@ -27,24 +41,16 @@ from transformers import BertTokenizerFast, AutoTokenizer
 
 #------------------------------------------------------------------------------#
 
-
-
-
-
-num_hidden_layers = 1
-ckpts_path = f"pretrained-bert-{num_hidden_layers}-layers"
-
 ### load tokenizer files from the local dir since we have already trained the model tokenizer
 tokenizer = BertTokenizerFast.from_pretrained(ckpts_path)
 
-### upload tokenizer to hub
-tokenizer.push_to_hub("model-growth-tokenizer")
-
+### upload tokenizer to hub, remote_hub_ckpts_path
+tokenizer.push_to_hub(remote_hub_ckpts_path)
 ### go to https://huggingface.co/skytree/model-growth-tokenizer/tree/main
 
 ### test for loading tokenizer from hub
-tokenizer = AutoTokenizer.from_pretrained("skytree/model-growth-tokenizer")
-
+tokenizer = AutoTokenizer.from_pretrained(remote_hub_ckpts_path)
+### What are downloaded:
 ### (py311) xiaofeng.wu@Fairfax4way04RTX4090:/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack$ python upload_tokenizer.py
 ### Downloading (…)okenizer_config.json: 100%|█████████████████████████████████████████████████████████████████| 314/314 [00:00<00:00, 5.38MB/s]
 ### Downloading (…)solve/main/vocab.txt: 100%|███████████████████████████████████████████████████████████████| 216k/216k [00:00<00:00, 26.8MB/s]

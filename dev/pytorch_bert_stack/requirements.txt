@@ -1,0 +1,5 @@
+apache_beam
+pysnooper
+debugpy
+python-dotenv
+huggingface-hub

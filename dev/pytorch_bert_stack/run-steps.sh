@@ -1,5 +1,13 @@
 ### All steps to do
-python pretrain_bert.py --num_hidden_layers 1
+python train_tokenizer_by_dataset.py
+
+python upload_tokenizer.py
+
+python save_tokenized_datasets.py
+
+#----------------------------------------
+
+python pretrain_bert_wiki_book.py --num_hidden_layers 1
 
 #----------------------------------------
 

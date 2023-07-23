@@ -1,6 +1,6 @@
 export TASK_NAME=mrpc
 export WANDB_MODE=offline
-export NCCL_P2P_DISABLE=1
+# export NCCL_P2P_DISABLE=1
 # export CUDA_VISIBLE_DEVICES=-1 # -1
 
 python run_glue.py \

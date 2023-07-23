@@ -1,17 +1,18 @@
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
-import os
 import argparse
-import json
-import glob
+import os
 
 from datasets import load_dataset
-from transformers import BertForMaskedLM, BertConfig, DataCollatorForLanguageModeling, \
-    Trainer, TrainingArguments, BertTokenizerFast, pipeline
 from tokenizers import BertWordPieceTokenizer
 
+from transformers import (
+    BertTokenizerFast,
+)
+
+
 os.environ['WANDB_MODE'] = 'offline'
-os.environ['NCCL_P2P_DISABLE'] = '1'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ['NCCL_P2P_DISABLE'] = '1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder.')
 parser.add_argument('--path_to_ckpts', default="", required=False, help='Path to the checkpoint folder')

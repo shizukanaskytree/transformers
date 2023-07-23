@@ -10,15 +10,23 @@ Original file is located at
 # pip install datasets transformers==4.18.0 sentencepiece
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
+import json
+import os
+from itertools import chain
+
 from datasets import load_dataset
-from transformers import BertForMaskedLM, BertConfig, DataCollatorForLanguageModeling, \
-    Trainer, TrainingArguments, BertTokenizerFast, pipeline
 from tokenizers import BertWordPieceTokenizer
 
+from transformers import (
+    BertConfig,
+    BertForMaskedLM,
+    BertTokenizerFast,
+    DataCollatorForLanguageModeling,
+    Trainer,
+    TrainingArguments,
+)
 from transformers.trainer_pt_utils import get_parameter_names
 
-import os
-import json
 
 os.environ['WANDB_MODE'] = 'offline'
 # os.environ['NCCL_P2P_DISABLE'] = '1'
@@ -138,7 +146,6 @@ else:
     test_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
     train_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
 
-from itertools import chain
 # Main data processing function that will concatenate all texts from our dataset and generate chunks of
 # max_seq_length.
 # grabbed from: https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_mlm.py
