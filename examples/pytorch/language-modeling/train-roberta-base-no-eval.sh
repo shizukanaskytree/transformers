@@ -11,6 +11,5 @@ python run_mlm.py \
     --per_device_eval_batch_size 8 \
     --num_train_epochs 1 \
     --do_train \
-    --do_eval \
     --output_dir /tmp/test-mlm \
     --overwrite_output_dir

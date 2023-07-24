@@ -5,17 +5,23 @@ Original file is located at
 """
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
-import os
 import argparse
-import json
 import glob
+import os
 
 import torch
-
 from datasets import load_dataset
-from transformers import BertForMaskedLM, BertConfig, DataCollatorForLanguageModeling, \
-    Trainer, TrainingArguments, BertTokenizerFast, pipeline
 from tokenizers import BertWordPieceTokenizer
+
+from transformers import (
+    BertConfig,
+    BertForMaskedLM,
+    BertTokenizerFast,
+    DataCollatorForLanguageModeling,
+    Trainer,
+    TrainingArguments,
+)
+
 
 # os.environ['WANDB_MODE'] = 'offline'
 os.environ['NCCL_P2P_DISABLE'] = '1'
@@ -130,6 +136,8 @@ else:
     train_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
 
 from itertools import chain
+
+
 # Main data processing function that will concatenate all texts from our dataset and generate chunks of
 # max_seq_length.
 # grabbed from: https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_mlm.py

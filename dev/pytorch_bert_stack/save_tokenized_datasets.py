@@ -1,14 +1,24 @@
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 from itertools import chain
 
-from global_constants import d, max_length, remote_hub_ckpts_path, tokenized_datasets_path
+from global_constants import (
+    d,
+    max_length,
+    remote_hub_ckpts_path,
+    tokenized_train_datasets_path,
+    tokenized_test_datasets_path,
+)
 
 from transformers import BertTokenizerFast
 
 
+print('='*80)
+print("Demo: d['train']['text'][:2]:")
+print('='*80)
 for t in d["train"]["text"][:2]:
     print(t)
-    print("="*50)
+    print("-"*60)
+print('='*80)
 
 ### whether to truncate
 truncate_longer_samples = False
@@ -30,16 +40,16 @@ encode = encode_with_truncation if truncate_longer_samples else encode_without_t
 ### tokenizing the train dataset
 train_dataset = d["train"].map(encode, batched=True)
 ### tokenizing the testing dataset
-# test_dataset = d["test"].map(encode, batched=True)
+test_dataset = d["test"].map(encode, batched=True)
 
 if truncate_longer_samples:
     ### remove other columns and set input_ids and attention_mask as PyTorch tensors
     train_dataset.set_format(type="torch", columns=["input_ids", "attention_mask"])
-    # test_dataset.set_format(type="torch", columns=["input_ids", "attention_mask"])
+    test_dataset.set_format(type="torch", columns=["input_ids", "attention_mask"])
 else:
     ### remove other columns, and remain them as Python lists
     train_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
-    # test_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
+    test_dataset.set_format(columns=["input_ids", "attention_mask", "special_tokens_mask"])
 
 ### Main data processing function that will concatenate all texts from our dataset and generate chunks of max_seq_length.
 ### grabbed from: https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_mlm.py
@@ -65,18 +75,23 @@ def group_texts(examples):
 ### https://huggingface.co/docs/datasets/package_reference/main_classes.html#datasets.Dataset.map
 if not truncate_longer_samples:
     train_dataset = train_dataset.map(group_texts, batched=True, desc=f"Grouping texts in chunks of {max_length}")
-    # test_dataset = test_dataset.map(group_texts, batched=True, desc=f"Grouping texts in chunks of {max_length}")
+    test_dataset = test_dataset.map(group_texts, batched=True, desc=f"Grouping texts in chunks of {max_length}")
     ### convert them from lists to torch tensors
     train_dataset.set_format("torch")
-    # test_dataset.set_format("torch")
+    test_dataset.set_format("torch")
 
-# print(f"len of train_dataset: {len(train_dataset)}, len of test_dataset: {len(test_dataset)}")
-# print(f"train_dataset: {train_dataset}")
+print('-'*60)
+print(f"train_dataset: {train_dataset}")
+print('-'*60)
+print(f"len of train_dataset: {len(train_dataset)}, len of test_dataset: {len(test_dataset)}")
+print('-'*60)
 ### train_dataset: Dataset({
 ###     features: ['title', 'text', 'domain', 'date', 'description', 'url', 'image_url', 'input_ids', 'token_type_ids', 'attention_mask', 'special_tokens_mask'],
 ###     num_rows: 691
 ### })
 
 ### Save your tokenized dataset to /data/wxf_tokenized_dataset
-train_dataset.save_to_disk(tokenized_datasets_path)
-# test_dataset.save_to_disk(tokenized_datasets_path)
+train_dataset.save_to_disk(tokenized_train_datasets_path)
+test_dataset.save_to_disk(tokenized_test_datasets_path)
+
+print(f"saved tokenized datasets to {tokenized_train_datasets_path} and {tokenized_test_datasets_path}")

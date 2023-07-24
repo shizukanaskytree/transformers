@@ -16,7 +16,9 @@ from global_constants import (
     global_batch_size,
     max_length,
     remote_hub_ckpts_path,
-    tokenized_datasets_path,
+    save_ckpt_every_X_steps,
+    tokenized_test_datasets_path,
+    tokenized_train_datasets_path,
     vocab_size,
 )
 
@@ -46,9 +48,9 @@ args = parser.parse_args()
 ### test for loading tokenizer from hub
 tokenizer = AutoTokenizer.from_pretrained(remote_hub_ckpts_path)
 
-# Load your tokenized dataset
-tokenized_train_dataset = load_from_disk(tokenized_datasets_path)
-# tokenized_test_dataset = load_from_disk(tokenized_datasets_path) ### we do not split wiki and bookcorpus.
+### Load your tokenized dataset, we do not split wiki and bookcorpus
+tokenized_train_dataset = load_from_disk(tokenized_train_datasets_path)
+tokenized_test_dataset = load_from_disk(tokenized_test_datasets_path) if tokenized_test_datasets_path else None
 
 ### initialize the model with the config
 model_config = BertConfig(
@@ -56,8 +58,14 @@ model_config = BertConfig(
     max_position_embeddings=max_length,
     num_hidden_layers=args.num_hidden_layers,
 )
+print('-'*80)
 print(f"model_config:\n{model_config}")
+print('-'*80)
+
 model = BertForMaskedLM(config=model_config)
+print('-'*80)
+print(f"model:\n{model}")
+print('-'*80)
 
 ### initialize the data collator, randomly masking 20% (default is 15%) of the tokens for the Masked Language
 ### Modeling (MLM) task
@@ -66,22 +74,26 @@ data_collator = DataCollatorForLanguageModeling(
 )
 
 num_of_gpus = torch.cuda.device_count()
-training_args = TrainingArguments(
-    output_dir=ckpts_path,          # output directory to where save model checkpoint
-    evaluation_strategy="steps",    # evaluate each `logging_steps` steps
-    overwrite_output_dir=True,
-    max_steps=100_000,
-    # num_train_epochs=10,          # If I set max_steps, I will not set num_train_epochs; number of training epochs, feel free to tweak, original code settting is 10
-    per_device_train_batch_size=global_batch_size//num_of_gpus,   # the training batch size, put it as high as your GPU memory fits
-    gradient_accumulation_steps=1,  # accumulating the gradients before updating the weights
-    per_device_eval_batch_size=global_batch_size//num_of_gpus,    # evaluation batch size
-    logging_steps=100,              # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing 1
-    save_steps=1000,                                # original 1000, for debug and testing 1
-    # load_best_model_at_end=True,                  # whether to load the best model (in terms of loss) at the end of training
-    save_total_limit=4,             # whether you don't have much space so you let only 3 model weights saved in the disk
-)
+
 ### TrainingArguments for bert reference:
 ### https://github.com/philschmid/deep-learning-habana-huggingface/blob/master/pre-training/pre-training-bert.ipynb
+training_args = TrainingArguments(
+    output_dir=ckpts_path,                                                      # output directory to where save model checkpoint
+    do_eval=False,
+    # evaluation_strategy="steps",                                              # evaluate each `logging_steps` steps
+    # eval_steps=10,                                                            # Evaluate every 500 training steps
+    overwrite_output_dir=True,
+    max_steps=100_000,                                                          # Limit the total number of training steps to 100_000
+    # num_train_epochs=10,                                                      # If I set max_steps, I will not set num_train_epochs; number of training epochs, feel free to tweak, original code settting is 10
+    per_device_train_batch_size=global_batch_size//num_of_gpus,                 # the training batch size, put it as high as your GPU memory fits
+    gradient_accumulation_steps=1,                                              # accumulating the gradients before updating the weights
+    per_device_eval_batch_size=global_batch_size//num_of_gpus,                  # evaluation batch size
+    logging_strategy='steps',
+    logging_steps=10,                                                           # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing with a smaller number e.g., 1
+    save_steps=save_ckpt_every_X_steps,                                         # original 1000, for debug and testing 1
+    # load_best_model_at_end=True,                                              # whether to load the best model (in terms of loss) at the end of training
+    save_total_limit=4,                                                         # whether you don't have much space so you let only 3 model weights saved in the disk
+)
 
 ### initialize the trainer and pass everything to it
 trainer = Trainer(
@@ -89,15 +101,15 @@ trainer = Trainer(
     args=training_args,
     data_collator=data_collator,
     train_dataset=tokenized_train_dataset,
-    # eval_dataset=test_dataset, ### we do not have an eval_dataset since we do not split bookcorpus and wiki datasets
+    eval_dataset=tokenized_test_dataset, ### we do not have an eval_dataset since we do not split bookcorpus and wiki datasets
 )
 
 ### train the model
-current_path = os.getcwd()  # Get the current working directory
+current_path = os.getcwd() ### Get the current working directory
 path_to_ckpts = os.path.join(current_path, args.path_to_ckpts) ### e.g., "pretrained-bert-2-layers", "checkpoint-68-stack"
 pattern = 'checkpoint-*-stacked'
 stacked_ckpt_dir = glob.glob(f'{path_to_ckpts}/{pattern}')
-# print(f"stacked_ckpt_dir: {stacked_ckpt_dir}")
+print(f"stacked_ckpt_dir: {stacked_ckpt_dir}")
 
 if len(stacked_ckpt_dir) == 0:
     trainer.train()
@@ -106,18 +118,18 @@ else:
 
 ################################################################################
 
-# # when you load from pretrained
+# ### when you load from pretrained
 # model = BertForMaskedLM.from_pretrained(os.path.join(ckpts_path, "checkpoint-10"))
 # tokenizer = BertTokenizerFast.from_pretrained(ckpts_path)
-# # or simply use pipeline
+# ### or simply use pipeline
 # fill_mask = pipeline("fill-mask", model=model, tokenizer=tokenizer)
 
-# # perform predictions
+# ### perform predictions
 # example = "It is known that [MASK] is the capital of Germany"
 # for prediction in fill_mask(example):
 #     print(prediction)
 
-# # perform predictions
+# ### perform predictions
 # examples = [
 #     "Today's most trending hashtags on [MASK] is Donald Trump",
 #     "The [MASK] was cloudy yesterday, but today it's rainy.",

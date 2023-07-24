@@ -1,5 +1,6 @@
 import torch
 
+
 def main():
     training_args_ckpt_path = "./pretrained-bert/checkpoint-66/training_args.bin"
     ckpt = torch.load(training_args_ckpt_path)

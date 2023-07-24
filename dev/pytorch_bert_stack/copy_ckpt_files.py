@@ -1,8 +1,9 @@
+import argparse
 import os
 import shutil
-import argparse
 
 from utils import find_second_largest_checkpoint
+
 
 def main():
     parser = argparse.ArgumentParser(description='Copy checkpoint files from source to destination folder. e.g., pretrained-bert-1-layer')

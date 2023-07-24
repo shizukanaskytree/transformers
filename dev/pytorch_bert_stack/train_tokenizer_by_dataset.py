@@ -23,8 +23,8 @@ tokenizer.train_from_iterator(dataset_iterator(d["train"]), vocab_size=vocab_siz
 ### Enable truncation up to the maximum 512 tokens
 tokenizer.enable_truncation(max_length=max_length)
 
-if not os.path.isdir(ckpts_path):
-    os.mkdir(ckpts_path)
+# if not os.path.isdir(ckpts_path):
+#     os.mkdir(ckpts_path)
 
 ### Create the new tokenizer object
 new_tokenizer = BertTokenizerFast(tokenizer_object=tokenizer, model_max_length=max_length)

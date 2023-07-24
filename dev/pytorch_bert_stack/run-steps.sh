@@ -1,15 +1,21 @@
 ### All steps to do
-python train_tokenizer_by_dataset.py
 
-python upload_tokenizer.py
+mkdir -p logs
 
-python save_tokenized_datasets.py
+### train tokenizer on wiki and book corpus
+python train_tokenizer_by_dataset.py 2>&1 | tee logs/log_train_tokenizer_by_dataset.log
 
-#----------------------------------------
+### upload tokenizer to hf hub
+python upload_tokenizer.py 2>&1 | tee logs/log_upload_tokenizer.log
 
-python pretrain_bert_wiki_book.py --num_hidden_layers 1
+### tokenize datasets and save to local disk
+python save_tokenized_datasets.py 2>&1 | tee logs/log_save_tokenized_datasets.log
 
-#----------------------------------------
+#-------------------------------------------------------------------------------
+
+python pretrain_bert_wiki_book.py --num_hidden_layers 1 2>&1 | tee logs/log_pretrain_bert_wiki_book_1.log
+
+#-------------------------------------------------------------------------------
 
 SRC_CKPT_FOLDER="pretrained-bert-1-layers"
 DEST_STACK_CKPT_FOLDER="pretrained-bert-2-layers"
@@ -30,4 +36,3 @@ python stack_optim.py --to_be_copied_layer_num 1 --src_ckpts_folder $SRC_CKPT_FO
 
 ### continue training
 python pretrain_bert.py --num_hidden_layers 3 --path_to_ckpts $DEST_STACK_CKPT_FOLDER
-
