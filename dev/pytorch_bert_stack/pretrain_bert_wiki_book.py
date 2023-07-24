@@ -11,10 +11,10 @@ import os
 
 import torch
 from datasets import load_from_disk
-from global_constants import (
-    ckpts_path,
+from dev.pytorch_bert_stack.commons import (
     global_batch_size,
     max_length,
+    model_ckpts_path,
     remote_hub_ckpts_path,
     save_ckpt_every_X_steps,
     tokenized_test_datasets_path,
@@ -75,10 +75,18 @@ data_collator = DataCollatorForLanguageModeling(
 
 num_of_gpus = torch.cuda.device_count()
 
+
+### todo:
+### todo:
+### todo:
+### e.g., ckpt-bert-wiki-bookcorpus/pretrained-bert-1-layers/checkpoint-10
+curr_file_path = os.path.abspath(__file__)
+model_ckpt_path = os.path.join(curr_file_path, args.path_to_ckpts) # e.g., args.path_to_ckpts: "pretrained-bert-2-layers", "checkpoint-68-stack"
+
 ### TrainingArguments for bert reference:
 ### https://github.com/philschmid/deep-learning-habana-huggingface/blob/master/pre-training/pre-training-bert.ipynb
 training_args = TrainingArguments(
-    output_dir=ckpts_path,                                                      # output directory to where save model checkpoint
+    output_dir=model_ckpt_path,                                                # output directory to where save model checkpoint
     do_eval=False,
     # evaluation_strategy="steps",                                              # evaluate each `logging_steps` steps
     # eval_steps=10,                                                            # Evaluate every 500 training steps
@@ -101,16 +109,16 @@ trainer = Trainer(
     args=training_args,
     data_collator=data_collator,
     train_dataset=tokenized_train_dataset,
-    eval_dataset=tokenized_test_dataset, ### we do not have an eval_dataset since we do not split bookcorpus and wiki datasets
+    eval_dataset=tokenized_test_dataset, # we do not have an eval_dataset since we do not split bookcorpus and wiki datasets
 )
 
-### train the model
-current_path = os.getcwd() ### Get the current working directory
-path_to_ckpts = os.path.join(current_path, args.path_to_ckpts) ### e.g., "pretrained-bert-2-layers", "checkpoint-68-stack"
-pattern = 'checkpoint-*-stacked'
-stacked_ckpt_dir = glob.glob(f'{path_to_ckpts}/{pattern}')
+### resume from last stacked checkpoint if it exists
+pattern = 'checkpoint-*-stacked' # e.g., checkpoint-50-stacked
+### path_to_ckpts: ckpt-bert-wiki-bookcorpus/pretrained-bert-1-layers
+stacked_ckpt_dir = glob.glob(f'{args.path_to_ckpts}/{pattern}')
 print(f"stacked_ckpt_dir: {stacked_ckpt_dir}")
 
+### train the model
 if len(stacked_ckpt_dir) == 0:
     trainer.train()
 else:
@@ -119,8 +127,8 @@ else:
 ################################################################################
 
 # ### when you load from pretrained
-# model = BertForMaskedLM.from_pretrained(os.path.join(ckpts_path, "checkpoint-10"))
-# tokenizer = BertTokenizerFast.from_pretrained(ckpts_path)
+# model = BertForMaskedLM.from_pretrained(os.path.join(model_ckpts_path, "checkpoint-10"))
+# tokenizer = BertTokenizerFast.from_pretrained(tokenizer_ckpt_path)
 # ### or simply use pipeline
 # fill_mask = pipeline("fill-mask", model=model, tokenizer=tokenizer)
 

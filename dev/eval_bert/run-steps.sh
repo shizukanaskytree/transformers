@@ -3,7 +3,5 @@
 ### baseline
 bash glue.sh
 
-### use different path for tokenizer, model ckpt etc
+### run glue on stacked_bert
 bash glue-stack.sh
-
-

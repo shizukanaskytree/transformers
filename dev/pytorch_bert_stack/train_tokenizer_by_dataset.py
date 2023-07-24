@@ -1,7 +1,5 @@
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
-import os
-
-from global_constants import ckpts_path, d, max_length, vocab_size
+from commons import d, max_length, tokenizer_ckpt_path, vocab_size
 from tokenizers import BertWordPieceTokenizer
 
 from transformers import BertTokenizerFast
@@ -17,16 +15,15 @@ def dataset_iterator(dataset):
 ### Initialize the WordPiece tokenizer
 tokenizer = BertWordPieceTokenizer()
 
-### Train the tokenizer directly from the dataset iterator
-tokenizer.train_from_iterator(dataset_iterator(d["train"]), vocab_size=vocab_size, special_tokens=special_tokens)
+### Train the tokenizer directly from the dataset iterator, doc: https://github.com/huggingface/tokenizers/blob/main/bindings/python/py_src/tokenizers/implementations/bert_wordpiece.py#L118
+tokenizer.train_from_iterator(dataset_iterator(d["train"]), vocab_size=vocab_size, special_tokens=special_tokens, show_progress=True)
 
 ### Enable truncation up to the maximum 512 tokens
 tokenizer.enable_truncation(max_length=max_length)
 
-# if not os.path.isdir(ckpts_path):
-#     os.mkdir(ckpts_path)
+### todo: tokenizer.save(tokenizer_ckpt_path)
 
 ### Create the new tokenizer object
 new_tokenizer = BertTokenizerFast(tokenizer_object=tokenizer, model_max_length=max_length)
-new_tokenizer.save_pretrained(ckpts_path)
-print(f"saved tokenizer to {ckpts_path}")
+new_tokenizer.save_pretrained(tokenizer_ckpt_path)
+print(f"saved tokenizer to local path: {tokenizer_ckpt_path}")

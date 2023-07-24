@@ -2,7 +2,7 @@
 import os
 
 from datasets import concatenate_datasets, load_dataset
-from global_constants import ckpts_path, max_length, vocab_size
+from dev.pytorch_bert_stack.commons import ckpts_path, max_length, vocab_size
 from tokenizers import BertWordPieceTokenizer
 
 from transformers import BertTokenizerFast

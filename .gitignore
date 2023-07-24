@@ -205,4 +205,5 @@ dev/pytorch_bert_stack/tests/save_tokenizer/train.txt
 
 dev/pytorch_bert_stack/pretrained-bert-tokenizer/*
 dev/pytorch_bert_stack/pretrained-bert-tokenizer-cc-news
-dev/pytorch_bert_stack/pretrained-bert-tokenizer-wiki-bookcorpus
+dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus
+dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus-tokenizer/*

@@ -1,8 +1,8 @@
 import os
 from os.path import expanduser, join
 
+from commons import remote_hub_ckpts_path, tokenizer_ckpt_path
 from dotenv import load_dotenv
-from global_constants import ckpts_path, remote_hub_ckpts_path
 from huggingface_hub import login
 
 from transformers import AutoTokenizer, BertTokenizerFast
@@ -21,7 +21,7 @@ login(token=token)
 #-------------------------------------------------------------------------------
 
 ### load tokenizer files from the local dir since we have already trained the model tokenizer
-tokenizer = BertTokenizerFast.from_pretrained(ckpts_path)
+tokenizer = BertTokenizerFast.from_pretrained(tokenizer_ckpt_path)
 
 ### upload tokenizer to hub, remote_hub_ckpts_path
 tokenizer.push_to_hub(remote_hub_ckpts_path)
