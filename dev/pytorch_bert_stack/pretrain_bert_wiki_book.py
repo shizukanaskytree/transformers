@@ -10,17 +10,16 @@ import glob
 import os
 
 import torch
-from datasets import load_from_disk
-from dev.pytorch_bert_stack.commons import (
+from commons import (
     global_batch_size,
     max_length,
-    model_ckpts_path,
     remote_hub_ckpts_path,
     save_ckpt_every_X_steps,
     tokenized_test_datasets_path,
     tokenized_train_datasets_path,
     vocab_size,
 )
+from datasets import load_from_disk
 
 from transformers import (
     AutoTokenizer,
@@ -63,9 +62,9 @@ print(f"model_config:\n{model_config}")
 print('-'*80)
 
 model = BertForMaskedLM(config=model_config)
-print('-'*80)
-print(f"model:\n{model}")
-print('-'*80)
+# print('-'*80)
+# print(f"model:\n{model}")
+# print('-'*80)
 
 ### initialize the data collator, randomly masking 20% (default is 15%) of the tokens for the Masked Language
 ### Modeling (MLM) task
@@ -75,13 +74,10 @@ data_collator = DataCollatorForLanguageModeling(
 
 num_of_gpus = torch.cuda.device_count()
 
-
-### todo:
-### todo:
-### todo:
-### e.g., ckpt-bert-wiki-bookcorpus/pretrained-bert-1-layers/checkpoint-10
+### finally, e.g., ckpt-bert-wiki-bookcorpus/pretrained-bert-1-layers/checkpoint-10
 curr_file_path = os.path.abspath(__file__)
-model_ckpt_path = os.path.join(curr_file_path, args.path_to_ckpts) # e.g., args.path_to_ckpts: "pretrained-bert-2-layers", "checkpoint-68-stack"
+curr_file_dir = os.path.dirname(curr_file_path)
+model_ckpt_path = os.path.join(curr_file_dir, args.path_to_ckpts) # e.g., args.path_to_ckpts: "pretrained-bert-1-layers", inside the folder "pretrained-bert-1-layers", we have "checkpoint-10" etc.
 
 ### TrainingArguments for bert reference:
 ### https://github.com/philschmid/deep-learning-habana-huggingface/blob/master/pre-training/pre-training-bert.ipynb
@@ -91,13 +87,13 @@ training_args = TrainingArguments(
     # evaluation_strategy="steps",                                              # evaluate each `logging_steps` steps
     # eval_steps=10,                                                            # Evaluate every 500 training steps
     overwrite_output_dir=True,
-    max_steps=100_000,                                                          # Limit the total number of training steps to 100_000
+    max_steps=200_000,                                                          # Limit the total number of training steps to 100_000
     # num_train_epochs=10,                                                      # If I set max_steps, I will not set num_train_epochs; number of training epochs, feel free to tweak, original code settting is 10
     per_device_train_batch_size=global_batch_size//num_of_gpus,                 # the training batch size, put it as high as your GPU memory fits
     gradient_accumulation_steps=1,                                              # accumulating the gradients before updating the weights
     per_device_eval_batch_size=global_batch_size//num_of_gpus,                  # evaluation batch size
     logging_strategy='steps',
-    logging_steps=10,                                                           # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing with a smaller number e.g., 1
+    logging_steps=20,                                                           # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing with a smaller number e.g., 1
     save_steps=save_ckpt_every_X_steps,                                         # original 1000, for debug and testing 1
     # load_best_model_at_end=True,                                              # whether to load the best model (in terms of loss) at the end of training
     save_total_limit=4,                                                         # whether you don't have much space so you let only 3 model weights saved in the disk

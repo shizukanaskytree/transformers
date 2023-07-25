@@ -7,14 +7,15 @@ vocab_size = 30_522
 ### maximum sequence length, lowering will result to faster training (when increasing batch size)
 max_length = 512
 
-### batch size for all GPUs
-global_batch_size = 128 # 128: 22_416 MiB / 24_564 MiB
+### 1 encoder: 128: 22_416 MiB / 24_564 MiB
+### 2 encoder:  64:  9_242 MiB / 24_564 MiB
+global_batch_size = 64 # batch size for all GPUs
 
 "Save checkpoint every X updates steps. Should be an integer or a float in range `[0,1)`."
 "If smaller than 1, will be interpreted as ratio of total training steps."
-save_ckpt_every_X_steps = 100
+save_ckpt_every_X_steps = 1000
 
-# DATASET_TYPE="wiki_and_bookcorpus"
+# DATASET_TYPE="cc_news"
 DATASET_TYPE="wiki_and_bookcorpus"
 if DATASET_TYPE == "wiki_and_bookcorpus":
     ### local tokenizer and model ckpt path

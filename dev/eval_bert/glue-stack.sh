@@ -1,11 +1,11 @@
 export TASK_NAME=mrpc
 
 ### uses different path for config (config_name), tokenizer (tokenizer_name), model ckpt (model_name_or_path) etc.
-CONFIG_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/checkpoint-50
+CONFIG_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-2-layers/checkpoint-101000
 ### tokenizer ckpt:
 TOKENIZER_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus
 ### model ckpt:
-MODEL_NAME_OR_PATH=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/checkpoint-50
+MODEL_NAME_OR_PATH=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-2-layers/checkpoint-101000
 
 python run_glue_stacked_bert.py \
   --config_name         $CONFIG_NAME \
