@@ -18,6 +18,8 @@
 
 # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
 
+# import pysnooper
+import datetime
 import logging
 import os
 import random
@@ -48,9 +50,6 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
-import pysnooper
-import datetime
-import os
 
 current_file_path = os.path.abspath(__file__)
 file_name = os.path.splitext(os.path.basename(current_file_path))[0]
@@ -59,9 +58,8 @@ log_folder = os.path.join(os.path.dirname(current_file_path), file_name + '-' + 
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 os.makedirs(log_folder, exist_ok=True)
 
-os.environ["WANDB_MODE"] = "offline"
-os.environ['NCCL_P2P_DISABLE'] = '1'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ["WANDB_MODE"] = "offline"
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.31.0.dev0")
