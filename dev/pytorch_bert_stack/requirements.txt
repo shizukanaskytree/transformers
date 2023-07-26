@@ -3,3 +3,4 @@ pysnooper
 debugpy
 python-dotenv
 huggingface-hub
+wandb

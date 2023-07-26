@@ -15,6 +15,12 @@ sudo chown -R $USER: /data/wxf_tokenized_dataset
 python save_tokenized_datasets.py 2>&1 | tee logs/log_save_tokenized_datasets_$(date +'%Y%m%d_%H%M%S').log
 
 #-------------------------------------------------------------------------------
+### baseline bert pre-training
+### [detached (from session 2)]
+DEST_STACKED_MODEL_CKPT_DIR="ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers"
+python pretrain_bert_wiki_book.py --num_hidden_layers 12 --path_to_ckpts $DEST_STACKED_MODEL_CKPT_DIR 2>&1 | tee logs/log_pretrain_bert_wiki_book_12_$(date +'%Y%m%d_%H%M%S').log
+
+#-------------------------------------------------------------------------------
 
 DEST_STACKED_MODEL_CKPT_DIR="ckpt-bert-wiki-bookcorpus/pretrained-bert-1-layers"
 python pretrain_bert_wiki_book.py --num_hidden_layers 1 --path_to_ckpts $DEST_STACKED_MODEL_CKPT_DIR 2>&1 | tee logs/log_pretrain_bert_wiki_book_1_$(date +'%Y%m%d_%H%M%S').log
