@@ -93,7 +93,7 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=1,                                              # accumulating the gradients before updating the weights
     per_device_eval_batch_size=global_batch_size//num_of_gpus,                  # evaluation batch size
     logging_strategy='steps',
-    logging_steps=20,                                                           # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing with a smaller number e.g., 1
+    logging_steps=1000,                                                         # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing with a smaller number e.g., 1
     save_steps=save_ckpt_every_X_steps,                                         # original 1000, for debug and testing 1
     # load_best_model_at_end=True,                                              # whether to load the best model (in terms of loss) at the end of training
     save_total_limit=4,                                                         # whether you don't have much space so you let only 3 model weights saved in the disk
@@ -110,16 +110,14 @@ trainer = Trainer(
 )
 
 ### resume from last stacked checkpoint if it exists
-pattern = 'checkpoint-*-stacked' # e.g., checkpoint-50-stacked
+pattern = 'checkpoint-*' # e.g., checkpoint-50-stacked
 ### path_to_ckpts: ckpt-bert-wiki-bookcorpus/pretrained-bert-1-layers
-stacked_ckpt_dir = glob.glob(f'{args.path_to_ckpts}/{pattern}')
-print(f"stacked_ckpt_dir: {stacked_ckpt_dir}")
+ckpt_dir = glob.glob(f'{args.path_to_ckpts}/{pattern}')
+# print(f"ckpt_dir: {ckpt_dir}")
+# print(f"ckpt_dir[-1]: {ckpt_dir[-1]}")
 
 ### train the model
-if len(stacked_ckpt_dir) == 0:
-    trainer.train()
-else:
-    trainer.train(resume_from_checkpoint=stacked_ckpt_dir[0])
+trainer.train(resume_from_checkpoint=ckpt_dir[-1])
 
 ################################################################################
 

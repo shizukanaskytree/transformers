@@ -4,11 +4,11 @@ RUN_LOGS=logs/$(date +'%Y%m%d_%H%M%S')
 mkdir -p $RUN_LOGS
 
 ### uses different path for config (config_name), tokenizer (tokenizer_name), model ckpt (model_name_or_path) etc.
-CONFIG_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-2-layers/checkpoint-101000
+CONFIG_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers/checkpoint-200000
 ### tokenizer ckpt:
 TOKENIZER_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus
 ### model ckpt:
-MODEL_NAME_OR_PATH=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-2-layers/checkpoint-101000
+MODEL_NAME_OR_PATH=/home/xiaofeng.wu/prjs/transformers/dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers/checkpoint-200000
 
 TASKS=("cola" "sst2" "mrpc" "stsb" "qqp" "mnli" "qnli" "rte" "wnli")
 

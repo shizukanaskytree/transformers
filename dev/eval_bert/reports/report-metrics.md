@@ -1,5 +1,7 @@
 # Reported Metrics
 
+## Baseline
+
 for different task, extract different metric according to the table
 
 ```
@@ -16,6 +18,28 @@ for different task, extract different metric according to the table
 | WNLI | Accuracy | 56.34 | 24 |
 ```
 
+## 20M steps
+
+```
+Task    Metric            Value (%)    Baseline (%)    Difference (%)
+------  --------------  -----------  --------------  ----------------
+CoLA    Matthews_corr         12.09           56.53            -44.44
+SST-2   Accuracy              80.39           92.32            -11.93
+MRPC    Accuracy              68.87           84.07            -15.2
+MRPC    F1                    80.19           88.85             -8.66
+STS-B   Pearson_corr          10.71           88.64            -77.93
+STS-B   Spearman_corr          8.25           88.48            -80.23
+QQP     Accuracy              83.71           90.71             -7
+QQP     F1                    78.98           87.49             -8.51
+MNLI    Matched_acc           65.65           83.91            -18.26
+MNLI    Mismatched_acc        66.32           84.1             -17.78
+QNLI    Accuracy              76.66           90.66            -14
+RTE     Accuracy              50.9            65.7             -14.8
+WNLI    Accuracy              29.58           56.34            -26.76
+```
+
+
+## GLUE logs
 
 ```
 for cola:

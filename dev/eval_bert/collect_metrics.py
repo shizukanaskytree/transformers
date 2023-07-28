@@ -1,13 +1,16 @@
+import argparse
 import os
 import re
 
 from tabulate import tabulate
 
 
-log_dir = "/home/xiaofeng.wu/prjs/transformers/dev/eval_bert/logs/"
-
-# Get list of log files
+parser = argparse.ArgumentParser(description="Get list of log files in a directory.")
+parser.add_argument("--log_dir", type=str, help="Path to the directory containing log files. e.g., '/home/xiaofeng.wu/prjs/transformers/dev/eval_bert/logs/20230728_080403'")
+args = parser.parse_args()
+log_dir = args.log_dir
 log_files = os.listdir(log_dir)
+# print("List of log files in the directory:", log_files)
 
 glue_tasks = {
     "CoLA": "cola_glue_stacked_bert",
@@ -244,7 +247,7 @@ for task_name, log_prefix in glue_tasks.items():
             # Add the task name and metrics to the table
             for metric, value in metrics.items():
                 baseline = baseline_metrics_table[task_name].get(metric, None)
-                if baseline is not None:
+                if baseline is not None and value is not None:
                     diff = value - baseline
                 else:
                     diff = "N/A"
