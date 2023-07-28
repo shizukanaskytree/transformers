@@ -184,26 +184,24 @@ dev/pytorch_bert_stack_cpu/pretrained-bert
 dev/pytorch_bert_stack_cpu/test.txt
 dev/pytorch_bert_stack_cpu/train.txt
 
-dev/pytorch_bert_stack_cpu/pretrained-bert-1-layer
-dev/pytorch_bert_stack_cpu/pretrained-bert-2-layers
-dev/pytorch_bert_stack/pretrained-bert-1-layer/*
+dev/pytorch_bert_stack_cpu/pretrained-bert-*-layers
 
-dev/pytorch_bert_stack/test.txt
-dev/pytorch_bert_stack/train.txt
+dev/pretrain_bert_stack/test.txt
+dev/pretrain_bert_stack/train.txt
 **/checkpoint-*
 
-dev/pytorch_bert_stack/pretrained-bert-*-layers/*
+dev/pretrain_bert_stack/pretrained-bert-*-layers/*
 
 **/wandb/*
 
-dev/pytorch_bert_stack/tests/load_tokenizer/pretrained-bert-*-layers/*
-dev/pytorch_bert_stack/tests/save_tokenizer/pretrained-bert-*-layers/*
-dev/pytorch_bert_stack/tests/load_tokenizer/test.txt
-dev/pytorch_bert_stack/tests/load_tokenizer/train.txt
-dev/pytorch_bert_stack/tests/save_tokenizer/test.txt
-dev/pytorch_bert_stack/tests/save_tokenizer/train.txt
+dev/pretrain_bert_stack/tests/load_tokenizer/pretrained-bert-*-layers/*
+dev/pretrain_bert_stack/tests/save_tokenizer/pretrained-bert-*-layers/*
+dev/pretrain_bert_stack/tests/load_tokenizer/test.txt
+dev/pretrain_bert_stack/tests/load_tokenizer/train.txt
+dev/pretrain_bert_stack/tests/save_tokenizer/test.txt
+dev/pretrain_bert_stack/tests/save_tokenizer/train.txt
 
-dev/pytorch_bert_stack/pretrained-bert-tokenizer/*
-dev/pytorch_bert_stack/pretrained-bert-tokenizer-cc-news
-dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus
-dev/pytorch_bert_stack/ckpt-bert-wiki-bookcorpus-tokenizer/*
+dev/pretrain_bert_stack/pretrained-bert-tokenizer/*
+dev/pretrain_bert_stack/pretrained-bert-tokenizer-cc-news
+dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus
+dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus-tokenizer/*
