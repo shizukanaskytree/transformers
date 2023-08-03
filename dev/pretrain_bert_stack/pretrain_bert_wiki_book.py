@@ -97,7 +97,7 @@ training_args = TrainingArguments(
     save_steps=save_ckpt_every_X_steps,                                         # original 1000, for debug and testing 1
     # load_best_model_at_end=True,                                              # whether to load the best model (in terms of loss) at the end of training
     save_total_limit=4,                                                         # whether you don't have much space so you let only 3 model weights saved in the disk
-    report_to="wandb",                                                          # https://docs.wandb.ai/guides/integrations/huggingface
+    # report_to="wandb", # bug...                                               # https://docs.wandb.ai/guides/integrations/huggingface
 )
 
 ### initialize the trainer and pass everything to it

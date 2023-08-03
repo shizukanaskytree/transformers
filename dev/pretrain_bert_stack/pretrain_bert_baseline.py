@@ -82,12 +82,12 @@ model_ckpt_path = os.path.join(curr_file_dir, args.path_to_ckpts) # e.g., args.p
 ### TrainingArguments for bert reference:
 ### https://github.com/philschmid/deep-learning-habana-huggingface/blob/master/pre-training/pre-training-bert.ipynb
 training_args = TrainingArguments(
-    output_dir=model_ckpt_path,                                                # output directory to where save model checkpoint
+    output_dir=model_ckpt_path,                                                 # output directory to where save model checkpoint
     do_eval=False,
     # evaluation_strategy="steps",                                              # evaluate each `logging_steps` steps
     # eval_steps=10,                                                            # Evaluate every 500 training steps
     overwrite_output_dir=True,
-    max_steps=300_000,                                                          # Limit the total number of training steps to 100_000
+    max_steps=450_000,                                                          # Limit the total number of training steps to xxx. BTW, 100_000 steps ~ 17 hours.
     # num_train_epochs=10,                                                      # If I set max_steps, I will not set num_train_epochs; number of training epochs, feel free to tweak, original code settting is 10
     per_device_train_batch_size=global_batch_size//num_of_gpus,                 # the training batch size, put it as high as your GPU memory fits
     gradient_accumulation_steps=1,                                              # accumulating the gradients before updating the weights
@@ -97,7 +97,7 @@ training_args = TrainingArguments(
     save_steps=save_ckpt_every_X_steps,                                         # original 1000, for debug and testing 1
     # load_best_model_at_end=True,                                              # whether to load the best model (in terms of loss) at the end of training
     save_total_limit=4,                                                         # whether you don't have much space so you let only 3 model weights saved in the disk
-    report_to="wandb",                                                          # https://docs.wandb.ai/guides/integrations/huggingface
+    # report_to="wandb", # bug...                                               # https://docs.wandb.ai/guides/integrations/huggingface
 )
 
 ### initialize the trainer and pass everything to it

@@ -18,7 +18,63 @@ for different task, extract different metric according to the table
 | WNLI | Accuracy | 56.34 | 24 |
 ```
 
-## 20M steps
+Note:
+BERT was originally pre-trained on 1 Million Steps (1_000_000) with a global batch size of 256 : We train with batch size of 256 sequences (256 sequences * 512 tokens = 128,000 tokens/batch) for 1,000,000 steps, which is approximately 40 epochs over the 3.3 billion word corpus.
+
+
+## 1_000_000 steps
+
+
+## 450_000 steps
+
+
+
+## 400_000 steps
+
+20230802_220031
+
+```
+Task    Metric            Value (%)    Baseline (%)    Difference (%)
+------  --------------  -----------  --------------  ----------------
+CoLA    Matthews_corr          9.29           56.53            -47.24
+SST-2   Accuracy              81.31           92.32            -11.01
+MRPC    Accuracy              68.38           84.07            -15.69
+MRPC    F1                    79.75           88.85             -9.1
+STS-B   Pearson_corr          14.1            88.64            -74.54
+STS-B   Spearman_corr         11.23           88.48            -77.25
+QQP     Accuracy              83.24           90.71             -7.47
+QQP     F1                    78.77           87.49             -8.72
+MNLI    Matched_acc           65.69           83.91            -18.22
+MNLI    Mismatched_acc        66.33           84.1             -17.77
+QNLI    Accuracy              76.3            90.66            -14.36
+RTE     Accuracy              47.29           65.7             -18.41
+WNLI    Accuracy              32.39           56.34            -23.95
+```
+
+
+
+## 300_000 steps
+
+```
+Task    Metric            Value (%)    Baseline (%)    Difference (%)
+------  --------------  -----------  --------------  ----------------
+CoLA    Matthews_corr         12.21           56.53            -44.32
+SST-2   Accuracy              80.16           92.32            -12.16
+MRPC    Accuracy              68.14           84.07            -15.93
+MRPC    F1                    79.56           88.85             -9.29
+STS-B   Pearson_corr          14.04           88.64            -74.6
+STS-B   Spearman_corr         11.9            88.48            -76.58
+QQP     Accuracy              83.76           90.71             -6.95
+QQP     F1                    79.08           87.49             -8.41
+MNLI    Matched_acc           65.86           83.91            -18.05
+MNLI    Mismatched_acc        66.51           84.1             -17.59
+QNLI    Accuracy              76.17           90.66            -14.49
+RTE     Accuracy              47.29           65.7             -18.41
+WNLI    Accuracy              30.99           56.34            -25.35
+```
+
+
+## 200_000 steps
 
 ```
 Task    Metric            Value (%)    Baseline (%)    Difference (%)

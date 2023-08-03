@@ -205,3 +205,5 @@ dev/pretrain_bert_stack/pretrained-bert-tokenizer/*
 dev/pretrain_bert_stack/pretrained-bert-tokenizer-cc-news
 dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus
 dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus-tokenizer/*
+
+dev/pretrain_bert_stack/ckpt-cached/*

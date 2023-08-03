@@ -7,8 +7,9 @@ vocab_size = 30_522
 ### maximum sequence length, lowering will result to faster training (when increasing batch size)
 max_length = 512
 
-### 1 encoder: 128: 22_416 MiB / 24_564 MiB
-### 2 encoder:  64:  9_242 MiB / 24_564 MiB
+### 1 encoder: global_batch_size 128: 22_416 MiB / 24_564 MiB
+### 2 encoder: global_batch_size 64:  9_242 MiB / 24_564 MiB
+### 12 encoder: global_batch_size 64: 18_424 MiB / 24_564 MiB
 global_batch_size = 64 # batch size for all GPUs
 
 "Save checkpoint every X updates steps. Should be an integer or a float in range `[0,1)`."
