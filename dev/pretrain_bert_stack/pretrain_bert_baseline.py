@@ -30,6 +30,16 @@ from transformers import (
     TrainingArguments,
 )
 
+import datetime
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
+import wandb
+wandb.login()
+
+max_steps = 500_000
+
+### Start a new wandb run
+run = wandb.init(project='pretrain_bert_baseline', job_type="training", name=f"max_steps_{str(max_steps)}_{timestamp}")
 
 # os.environ['WANDB_MODE'] = 'offline'
 # os.environ['NCCL_P2P_DISABLE'] = '1'
@@ -87,17 +97,17 @@ training_args = TrainingArguments(
     # evaluation_strategy="steps",                                              # evaluate each `logging_steps` steps
     # eval_steps=10,                                                            # Evaluate every 500 training steps
     overwrite_output_dir=True,
-    max_steps=450_000,                                                          # Limit the total number of training steps to xxx. BTW, 100_000 steps ~ 17 hours.
+    max_steps=max_steps,                                                        # Limit the total number of training steps to xxx. BTW, 100_000 steps ~ 17 hours.
     # num_train_epochs=10,                                                      # If I set max_steps, I will not set num_train_epochs; number of training epochs, feel free to tweak, original code settting is 10
     per_device_train_batch_size=global_batch_size//num_of_gpus,                 # the training batch size, put it as high as your GPU memory fits
     gradient_accumulation_steps=1,                                              # accumulating the gradients before updating the weights
     per_device_eval_batch_size=global_batch_size//num_of_gpus,                  # evaluation batch size
     logging_strategy='steps',
-    logging_steps=1000,                                                         # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing with a smaller number e.g., 1
+    logging_steps=1,                                                         # evaluate, log and save model checkpoints every 1000 step, original 1000, for debug and testing with a smaller number e.g., 1
     save_steps=save_ckpt_every_X_steps,                                         # original 1000, for debug and testing 1
     # load_best_model_at_end=True,                                              # whether to load the best model (in terms of loss) at the end of training
     save_total_limit=4,                                                         # whether you don't have much space so you let only 3 model weights saved in the disk
-    # report_to="wandb", # bug...                                               # https://docs.wandb.ai/guides/integrations/huggingface
+    report_to="wandb", # bug...                                                 # https://docs.wandb.ai/guides/integrations/huggingface
 )
 
 ### initialize the trainer and pass everything to it

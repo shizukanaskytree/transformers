@@ -27,6 +27,25 @@ BERT was originally pre-trained on 1 Million Steps (1_000_000) with a global bat
 
 ## 450_000 steps
 
+2023年08月04日10:32:40
+
+```
+Task    Metric            Value (%)    Baseline (%)    Difference (%)
+------  --------------  -----------  --------------  ----------------
+CoLA    Matthews_corr          9.48           56.53            -47.05
+SST-2   Accuracy              81.42           92.32            -10.9
+MRPC    Accuracy              68.38           84.07            -15.69
+MRPC    F1                    80.12           88.85             -8.73
+STS-B   Pearson_corr          13.83           88.64            -74.81
+STS-B   Spearman_corr         11.36           88.48            -77.12
+QQP     Accuracy              83.75           90.71             -6.96
+QQP     F1                    79.08           87.49             -8.41
+MNLI    Matched_acc           65.89           83.91            -18.02
+MNLI    Mismatched_acc        66.7            84.1             -17.4
+QNLI    Accuracy              77.78           90.66            -12.88
+RTE     Accuracy              48.74           65.7             -16.96
+WNLI    Accuracy              30.99           56.34            -25.35
+```
 
 
 ## 400_000 steps
@@ -50,7 +69,6 @@ QNLI    Accuracy              76.3            90.66            -14.36
 RTE     Accuracy              47.29           65.7             -18.41
 WNLI    Accuracy              32.39           56.34            -23.95
 ```
-
 
 
 ## 300_000 steps

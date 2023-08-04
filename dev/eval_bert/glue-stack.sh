@@ -5,11 +5,11 @@ mkdir -p $RUN_LOGS
 
 # dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers/checkpoint-400000
 ### uses different path for config (config_name), tokenizer (tokenizer_name), model ckpt (model_name_or_path) etc.
-CONFIG_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers/checkpoint-400000
+CONFIG_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers/checkpoint-450000
 ### tokenizer ckpt:
 TOKENIZER_NAME=/home/xiaofeng.wu/prjs/transformers/dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus
 ### model ckpt:
-MODEL_NAME_OR_PATH=/home/xiaofeng.wu/prjs/transformers/dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers/checkpoint-400000
+MODEL_NAME_OR_PATH=/home/xiaofeng.wu/prjs/transformers/dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus/pretrained-bert-12-layers/checkpoint-450000
 
 TASKS=("cola" "sst2" "mrpc" "stsb" "qqp" "mnli" "qnli" "rte" "wnli")
 
