@@ -24,9 +24,14 @@ https://huggingface.co/models?filter=fill-mask
 import pysnooper
 import datetime
 import os
+
+current_file_path = os.path.abspath(__file__)
+file_name = os.path.splitext(os.path.basename(current_file_path))[0]
+file_extension = os.path.splitext(os.path.basename(current_file_path))[1][1:]
+log_folder = os.path.join(os.path.dirname(current_file_path), file_name + '-' + file_extension + '-logs')
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-log_folder = "run_mlm-py"
 os.makedirs(log_folder, exist_ok=True)
+
 
 import logging
 import math
@@ -73,6 +78,10 @@ MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 class ModelArguments:
     """
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune, or train from scratch.
+
+    ##################
+    train from scratch
+    ##################
     """
 
     model_name_or_path: Optional[str] = field(
@@ -231,7 +240,7 @@ class DataTrainingArguments:
                 if extension not in ["csv", "json", "txt"]:
                     raise ValueError("`validation_file` should be a csv, a json or a txt file.")
 
-# @pysnooper.snoop(os.path.join(log_folder, f"main-{timestamp}.log"), color=False, max_variable_length=2000)
+@pysnooper.snoop(os.path.join(log_folder, f"main-{timestamp}.log"), color=False, max_variable_length=2000)
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
@@ -375,6 +384,11 @@ def main():
         "revision": model_args.model_revision,
         "use_auth_token": True if model_args.use_auth_token else None,
     }
+
+    """
+    --model_name_or_path bert-base-uncased: this option cannot be set.
+
+    """
     if model_args.config_name:
         config = AutoConfig.from_pretrained(model_args.config_name, **config_kwargs)
     elif model_args.model_name_or_path:
@@ -414,6 +428,9 @@ def main():
             low_cpu_mem_usage=model_args.low_cpu_mem_usage,
         )
     else:
+        ########################################################################
+        # Training new model from scratch
+        ########################################################################
         logger.info("Training new model from scratch")
         model = AutoModelForMaskedLM.from_config(config)
 
