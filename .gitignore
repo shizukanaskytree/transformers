@@ -207,3 +207,4 @@ dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus
 dev/pretrain_bert_stack/ckpt-bert-wiki-bookcorpus-tokenizer/*
 
 dev/pretrain_bert_stack/ckpt-cached/*
+examples/pytorch/train-tokenizer/code-search-net-tokenizer/*
