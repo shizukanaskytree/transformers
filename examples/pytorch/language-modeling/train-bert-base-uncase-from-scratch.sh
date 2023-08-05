@@ -3,13 +3,14 @@
 
 CKPT_DIR=/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased
 mkdir -p $CKPT_DIR
+TOKENIZER_DIR=skytree/tokenizer-bert-wiki-bookcorpus
 
 ### NOTE:
 ### DO NOT set --model_name_or_path bert-base-uncased when we train from scratch.
 
 python run_mlm.py \
     --config_name bert-base-uncased \
-    --tokenizer_name bert-base-uncased \
+    --tokenizer_name $TOKENIZER_DIR \
     \
     --dataset_name wikitext \
     --dataset_config_name wikitext-2-raw-v1 \

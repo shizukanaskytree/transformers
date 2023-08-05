@@ -1,6 +1,5 @@
 from datasets import DatasetDict, concatenate_datasets, load_dataset
 
-
 ### 30,522 vocab is BERT's default vocab size, feel free to tweak
 vocab_size = 30_522
 

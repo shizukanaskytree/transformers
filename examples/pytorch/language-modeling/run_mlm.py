@@ -240,7 +240,7 @@ class DataTrainingArguments:
                 if extension not in ["csv", "json", "txt"]:
                     raise ValueError("`validation_file` should be a csv, a json or a txt file.")
 
-@pysnooper.snoop(os.path.join(log_folder, f"main-{timestamp}.log"), color=False, max_variable_length=2000)
+# @pysnooper.snoop(os.path.join(log_folder, f"main-{timestamp}.log"), color=False, max_variable_length=2000)
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
@@ -386,8 +386,8 @@ def main():
     }
 
     """
+    Note:
     --model_name_or_path bert-base-uncased: this option cannot be set.
-
     """
     if model_args.config_name:
         config = AutoConfig.from_pretrained(model_args.config_name, **config_kwargs)
