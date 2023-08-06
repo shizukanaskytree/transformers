@@ -16,10 +16,6 @@
 """ Finetuning the library models for sequence classification on GLUE."""
 # You can also adapt this script on your own text classification task. Pointers for this are left as comments.
 
-# import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); debugpy.breakpoint()
-
-# import pysnooper
-import datetime
 import logging
 import os
 import random
@@ -50,13 +46,6 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
-
-current_file_path = os.path.abspath(__file__)
-file_name = os.path.splitext(os.path.basename(current_file_path))[0]
-file_extension = os.path.splitext(os.path.basename(current_file_path))[1][1:]
-log_folder = os.path.join(os.path.dirname(current_file_path), file_name + '-' + file_extension)
-timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-os.makedirs(log_folder, exist_ok=True)
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.31.0.dev0")
@@ -214,15 +203,6 @@ class ModelArguments:
     )
 
 
-#-------------------------------------------------------------#
-# todo:
-# 1. use different path for tokenizer, model ckpt etc
-# 1.1 tokenizer ckpt path
-# 1.2 model ckpt path
-#-------------------------------------------------------------#
-
-
-# @pysnooper.snoop(os.path.join(log_folder, f"main-{timestamp}.log"), color=False, max_variable_length=2000)
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
@@ -240,7 +220,7 @@ def main():
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
     send_example_telemetry("run_glue", model_args, data_args)
 
-    ### Setup logging
+    # Setup logging
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",

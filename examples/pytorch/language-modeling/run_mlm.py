@@ -43,7 +43,7 @@ from typing import Optional
 
 import datasets
 import evaluate
-from datasets import load_dataset
+from datasets import load_dataset, concatenate_datasets, DatasetDict
 
 import transformers
 from transformers import (
@@ -302,74 +302,92 @@ def main():
     # Set seed before initializing model.
     set_seed(training_args.seed)
 
-    # Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
-    # or just provide the name of one of the public datasets available on the hub at https://huggingface.co/datasets/
-    # (the dataset will be downloaded automatically from the datasets Hub
-    #
-    # For CSV/JSON files, this script will use the column called 'text' or the first column. You can easily tweak this
-    # behavior (see below)
-    #
-    # In distributed training, the load_dataset function guarantee that only one local process can concurrently
-    # download the dataset.
     if data_args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        raw_datasets = load_dataset(
-            data_args.dataset_name,
-            data_args.dataset_config_name,
-            cache_dir=model_args.cache_dir,
-            use_auth_token=True if model_args.use_auth_token else None,
-            streaming=data_args.streaming,
-        )
-        if "validation" not in raw_datasets.keys():
-            raw_datasets["validation"] = load_dataset(
-                data_args.dataset_name,
-                data_args.dataset_config_name,
-                split=f"train[:{data_args.validation_split_percentage}%]",
-                cache_dir=model_args.cache_dir,
-                use_auth_token=True if model_args.use_auth_token else None,
-                streaming=data_args.streaming,
-            )
-            raw_datasets["train"] = load_dataset(
-                data_args.dataset_name,
-                data_args.dataset_config_name,
-                split=f"train[{data_args.validation_split_percentage}%:]",
-                cache_dir=model_args.cache_dir,
-                use_auth_token=True if model_args.use_auth_token else None,
-                streaming=data_args.streaming,
-            )
-    else:
-        data_files = {}
-        if data_args.train_file is not None:
-            data_files["train"] = data_args.train_file
-            extension = data_args.train_file.split(".")[-1]
-        if data_args.validation_file is not None:
-            data_files["validation"] = data_args.validation_file
-            extension = data_args.validation_file.split(".")[-1]
-        if extension == "txt":
-            extension = "text"
-        raw_datasets = load_dataset(
-            extension,
-            data_files=data_files,
-            cache_dir=model_args.cache_dir,
-            use_auth_token=True if model_args.use_auth_token else None,
-        )
+        logger.info(f"Dataset name: {data_args.dataset_name}")
 
-        # If no validation data is there, validation_split_percentage will be used to divide the dataset.
-        if "validation" not in raw_datasets.keys():
-            raw_datasets["validation"] = load_dataset(
-                extension,
-                data_files=data_files,
-                split=f"train[:{data_args.validation_split_percentage}%]",
-                cache_dir=model_args.cache_dir,
-                use_auth_token=True if model_args.use_auth_token else None,
-            )
-            raw_datasets["train"] = load_dataset(
-                extension,
-                data_files=data_files,
-                split=f"train[{data_args.validation_split_percentage}%:]",
-                cache_dir=model_args.cache_dir,
-                use_auth_token=True if model_args.use_auth_token else None,
-            )
+        ### use wiki and bookcorpus
+        ### slicing e.g., x = datasets.load_dataset("bookcorpus", split="train[:10%]")
+        bookcorpus = load_dataset("bookcorpus", split="train") # [:1000]
+        wiki = load_dataset("wikipedia", "20220301.en", split="train")
+        wiki = wiki.remove_columns([col for col in wiki.column_names if col != "text"])  # only keep the 'text' column
+        assert bookcorpus.features.type == wiki.features.type
+        raw_datasets = concatenate_datasets([bookcorpus, wiki])
+        # raw_datasets = DictDataset({"train": raw_datasets["text"]})
+        raw_datasets = DatasetDict({'train': raw_datasets})
+
+    ### the original code for loading data: wiki: https://huggingface.co/datasets/wikitext
+    ###
+    ### Get the datasets: you can either provide your own CSV/JSON/TXT training and evaluation files (see below)
+    ### or just provide the name of one of the public datasets available on the hub at https://huggingface.co/datasets/
+    ### (the dataset will be downloaded automatically from the datasets Hub
+    ###
+    ### For CSV/JSON files, this script will use the column called 'text' or the first column. You can easily tweak this
+    ### behavior (see below)
+    ###
+    ### In distributed training, the load_dataset function guarantee that only one local process can concurrently
+    ### download the dataset.
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # if data_args.dataset_name is not None:
+    #     # Downloading and loading a dataset from the hub.
+    #     raw_datasets = load_dataset(
+    #         data_args.dataset_name,
+    #         data_args.dataset_config_name,
+    #         cache_dir=model_args.cache_dir,
+    #         use_auth_token=True if model_args.use_auth_token else None,
+    #         streaming=data_args.streaming,
+    #     )
+    #     if "validation" not in raw_datasets.keys():
+    #         raw_datasets["validation"] = load_dataset(
+    #             data_args.dataset_name,
+    #             data_args.dataset_config_name,
+    #             split=f"train[:{data_args.validation_split_percentage}%]",
+    #             cache_dir=model_args.cache_dir,
+    #             use_auth_token=True if model_args.use_auth_token else None,
+    #             streaming=data_args.streaming,
+    #         )
+    #         raw_datasets["train"] = load_dataset(
+    #             data_args.dataset_name,
+    #             data_args.dataset_config_name,
+    #             split=f"train[{data_args.validation_split_percentage}%:]",
+    #             cache_dir=model_args.cache_dir,
+    #             use_auth_token=True if model_args.use_auth_token else None,
+    #             streaming=data_args.streaming,
+    #         )
+    # else:
+    #     data_files = {}
+    #     if data_args.train_file is not None:
+    #         data_files["train"] = data_args.train_file
+    #         extension = data_args.train_file.split(".")[-1]
+    #     if data_args.validation_file is not None:
+    #         data_files["validation"] = data_args.validation_file
+    #         extension = data_args.validation_file.split(".")[-1]
+    #     if extension == "txt":
+    #         extension = "text"
+    #     raw_datasets = load_dataset(
+    #         extension,
+    #         data_files=data_files,
+    #         cache_dir=model_args.cache_dir,
+    #         use_auth_token=True if model_args.use_auth_token else None,
+    #     )
+
+    #     # If no validation data is there, validation_split_percentage will be used to divide the dataset.
+    #     if "validation" not in raw_datasets.keys():
+    #         raw_datasets["validation"] = load_dataset(
+    #             extension,
+    #             data_files=data_files,
+    #             split=f"train[:{data_args.validation_split_percentage}%]",
+    #             cache_dir=model_args.cache_dir,
+    #             use_auth_token=True if model_args.use_auth_token else None,
+    #         )
+    #         raw_datasets["train"] = load_dataset(
+    #             extension,
+    #             data_files=data_files,
+    #             split=f"train[{data_args.validation_split_percentage}%:]",
+    #             cache_dir=model_args.cache_dir,
+    #             use_auth_token=True if model_args.use_auth_token else None,
+    #         )
+    #---------------------------------------------------------------------------
+
 
     # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
     # https://huggingface.co/docs/datasets/loading_datasets.html.
@@ -429,19 +447,19 @@ def main():
         )
     else:
         ########################################################################
-        # Training new model from scratch
+        # Training new model FROM SCRATCH
         ########################################################################
         logger.info("Training new model from scratch")
         model = AutoModelForMaskedLM.from_config(config)
 
-    # We resize the embeddings only when necessary to avoid index errors. If you are creating a model from scratch
-    # on a small vocab and want a smaller embedding size, remove this test.
+    ### We resize the embeddings only when necessary to avoid index errors. If you are creating a model from scratch
+    ### on a small vocab and want a smaller embedding size, remove this test.
     embedding_size = model.get_input_embeddings().weight.shape[0]
     if len(tokenizer) > embedding_size:
         model.resize_token_embeddings(len(tokenizer))
 
-    # Preprocessing the datasets.
-    # First we tokenize all the texts.
+    ### Preprocessing the datasets.
+    ### First we tokenize all the texts.
     if training_args.do_train:
         column_names = list(raw_datasets["train"].features)
     else:
@@ -524,8 +542,8 @@ def main():
                     remove_columns=column_names,
                 )
 
-        # Main data processing function that will concatenate all texts from our dataset and generate chunks of
-        # max_seq_length.
+        ### Main data processing function that will concatenate all texts from our dataset and generate chunks of
+        ### max_seq_length.
         def group_texts(examples):
             # Concatenate all texts.
             concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}
@@ -540,12 +558,12 @@ def main():
             }
             return result
 
-        # Note that with `batched=True`, this map processes 1,000 texts together, so group_texts throws away a
-        # remainder for each of those groups of 1,000 texts. You can adjust that batch_size here but a higher value
-        # might be slower to preprocess.
-        #
-        # To speed up this part, we use multiprocessing. See the documentation of the map method for more information:
-        # https://huggingface.co/docs/datasets/package_reference/main_classes.html#datasets.Dataset.map
+        ### Note that with `batched=True`, this map processes 1,000 texts together, so group_texts throws away a
+        ### remainder for each of those groups of 1,000 texts. You can adjust that batch_size here but a higher value
+        ### might be slower to preprocess.
+        ###
+        ### To speed up this part, we use multiprocessing. See the documentation of the map method for more information:
+        ### https://huggingface.co/docs/datasets/package_reference/main_classes.html#datasets.Dataset.map
 
         with training_args.main_process_first(desc="grouping texts together"):
             if not data_args.streaming:
@@ -598,8 +616,8 @@ def main():
             preds = preds[mask]
             return metric.compute(predictions=preds, references=labels)
 
-    # Data collator
-    # This one will take care of randomly masking the tokens.
+    ### Data collator
+    ### This one will take care of randomly masking the tokens.
     pad_to_multiple_of_8 = data_args.line_by_line and training_args.fp16 and not data_args.pad_to_max_length
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
@@ -607,7 +625,7 @@ def main():
         pad_to_multiple_of=8 if pad_to_multiple_of_8 else None,
     )
 
-    # Initialize our Trainer
+    ### Initialize our Trainer
     trainer = Trainer(
         model=model,
         args=training_args,

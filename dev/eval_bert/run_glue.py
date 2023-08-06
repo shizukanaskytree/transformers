@@ -46,10 +46,6 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
-os.environ["WANDB_MODE"] = "offline"
-os.environ['NCCL_P2P_DISABLE'] = '1'
-# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
-
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.31.0.dev0")
 
