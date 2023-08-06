@@ -21,3 +21,7 @@ python pipeline-bert.py
 ### glue evaluation
 bash eval_glue_bert.sh
 
+### get metrics from logs and compare the data with the baseline metrics after bash glue-stack.sh
+python collect_metrics.py --log_dir "./logs/20230806_110206"
+
+#-------------------------------------------------------------------------------

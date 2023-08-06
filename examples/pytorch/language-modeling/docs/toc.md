@@ -1,6 +1,7 @@
 [why we resize the embeddings to be the same as the len of tokenizer?](embedding_size.md)
 [wiki and bookcorpus dataset](wiki-book-dataset.md)
 [hyperparams: Pretraining and Finetuning](hyperparams-pre-training.md)
+[Evaluation results: bert-base-uncased](glue_metrics-bert-base-uncased.md)
 [TODO](todo.md)
 [Discussion and solution](pytorch_parallel_training_gather_along_dimension_0.md)
 [load wiki dataset](dataset-wiki.md)
