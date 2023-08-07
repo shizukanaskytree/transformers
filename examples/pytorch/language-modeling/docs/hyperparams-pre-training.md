@@ -1,5 +1,9 @@
 # hyperparams: Pretraining and Finetuning
 
+- https://stephanheijl.com/notes_on_bert.html
+- https://datascience.stackexchange.com/questions/64583/what-are-the-good-parameter-ranges-for-bert-hyperparameters-while-finetuning-it
+
+
 | Setting | Pretraining | Finetuning |
 | --- | --- | --- |
 | **Adam settings** | | |
@@ -7,7 +11,7 @@
 | Learning rate warmup | 10000 steps | 10000 steps |
 | L2 weight decay | 0.01 | 0.01 |
 | β1 | 0.9 | 0.9 |
-| β2 | 0.99 | 0.99 |
+| β2 | 0.999 | 0.999 |
 | **Architecture settings** | | |
 | Dropout | 0.1 | 0.1 |
 | Activation | GELU | GELU |

@@ -4,6 +4,8 @@
 CKPT_DIR=/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased
 mkdir -p $CKPT_DIR
 
+RESUME_FROM_CHECKPOINT=$CKPT_DIR/checkpoint-38000
+
 TOKENIZER_DIR=skytree/tokenizer-bert-wiki-bookcorpus
 
 ### NOTE:
@@ -17,13 +19,13 @@ python run_mlm.py \
     \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
-    --num_train_epochs 1 \
+    --num_train_epochs 40 \
     \
     --learning_rate 1e-4 \
     --warmup_steps 10000 \
     --weight_decay 0.01 \
     --adam_beta1 0.9 \
-    --adam_beta2 0.99 \
+    --adam_beta2 0.999 \
     \
     --do_train \
     \
@@ -31,7 +33,7 @@ python run_mlm.py \
     \
     --output_dir $CKPT_DIR \
     --overwrite_output_dir True \
-    --resume_from_checkpoint $CKPT_DIR \
+    --resume_from_checkpoint $RESUME_FROM_CHECKPOINT \
     --save_total_limit 3 \
     \
     --report_to wandb \

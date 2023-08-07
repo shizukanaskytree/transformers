@@ -3,5 +3,7 @@
 [hyperparams: Pretraining and Finetuning](hyperparams-pre-training.md)
 [Evaluation results: bert-base-uncased](glue_metrics-bert-base-uncased.md)
 [TODO](todo.md)
+[如何从零开始训练BERT？](bert_hardcore_fundatation.md)
 [Discussion and solution](pytorch_parallel_training_gather_along_dimension_0.md)
 [load wiki dataset](dataset-wiki.md)
+[pysnooper: main func baseline tracing](main-pysnooper-20230805_083104-log.md)
