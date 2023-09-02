@@ -2,7 +2,7 @@
 RUN_LOGS=logs/glue-$(date +'%Y%m%d_%H%M%S')
 mkdir -p $RUN_LOGS
 
-COMMON_DIR=/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased/checkpoint-1694500
+COMMON_DIR=/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased/checkpoint-2528500
 
 ### uses different path for config (config_name), tokenizer (tokenizer_name), model ckpt (model_name_or_path) etc.
 CONFIG_NAME=$COMMON_DIR
@@ -35,7 +35,7 @@ do
         --overwrite_output_dir \
         \
         --report_to wandb \
-        --run_name glue-bert-$(date +'%Y%m%d_%H%M%S') \
+        --run_name glue-bert-$TASK_NAME-$(date +'%Y%m%d_%H%M%S') \
         \
         2>&1 | tee ${RUN_LOGS}/${TASK_NAME}_glue_stacked_bert.log
 done

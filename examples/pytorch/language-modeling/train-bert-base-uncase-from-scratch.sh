@@ -5,7 +5,8 @@ CKPT_DIR=/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased
 mkdir -p $CKPT_DIR
 
 ### NOTE: chang this to a specific checkpoint in the path: /home/xiaofeng.wu/prjs/ckpts/bert-base-uncased
-RESUME_FROM_CHECKPOINT=$CKPT_DIR/checkpoint-1694500
+### checkpoints: 1694500, 2023-08-25; 1965000, 2023-08-27 11:58:43; 2528500, 2023-09-02 11:14;
+RESUME_FROM_CHECKPOINT=$CKPT_DIR/checkpoint-1965000
 
 TOKENIZER_DIR=skytree/tokenizer-bert-wiki-bookcorpus
 
