@@ -2,7 +2,7 @@
 RUN_LOGS=logs/glue-$(date +'%Y%m%d_%H%M%S')
 mkdir -p $RUN_LOGS
 
-COMMON_DIR=/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased/checkpoint-2528500
+COMMON_DIR=/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased/checkpoint-2528000
 
 ### uses different path for config (config_name), tokenizer (tokenizer_name), model ckpt (model_name_or_path) etc.
 CONFIG_NAME=$COMMON_DIR
