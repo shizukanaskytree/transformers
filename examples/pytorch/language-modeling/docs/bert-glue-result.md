@@ -4,6 +4,29 @@
 
 todo
 
+```
+(py311) xiaofeng.wu@Fairfax4way05RTX4090:/home/xiaofeng.wu/prjs/transformers/examples/pytorch/language-modeling$ python collect_metrics.py --log_dir "./logs/glue-20230902_110318"
+
+Task    Metric            Value (%)    Baseline (%)  Difference (%)
+------  --------------  -----------  --------------  ----------------
+CoLA    Matthews_corr         31.47           52.1   -20.63
+SST-2   Accuracy              92.55           93.5   -0.95
+MRPC    Accuracy              69.61                  N/A
+MRPC    F1                    81.82           88.9   -7.08
+STS-B   Pearson_corr          74.43           85.8   -11.37
+STS-B   Spearman_corr         75.48                  N/A
+QQP     Accuracy              88.51           71.2   17.31
+QQP     F1                    84.68                  N/A
+MNLI    Matched_acc           82.69           84.6   -1.91
+MNLI    Mismatched_acc        83.55           83.4   0.15
+QNLI    Accuracy              89.71           90.5   -0.79
+RTE     Accuracy              49.1            66.4   -17.3
+WNLI    Accuracy              42.25           56.34  -14.09
+```
+
+This seems much normal...
+
+===
 
 
 `(py311) xiaofeng.wu@Fairfax4way05RTX4090:/home/xiaofeng.wu/prjs/transformers/examples/pytorch/language-modeling$ python collect_metrics.py --log_dir "./logs/glue-20230901_231338"`
