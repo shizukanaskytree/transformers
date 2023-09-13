@@ -1,8 +1,27 @@
 # BERT Glue result
 
+
+
+```
+(py311) xiaofeng.wu@Fairfax4way05RTX4090:/home/xiaofeng.wu/prjs/transformers/examples/pytorch/language-modeling$ python collect_metrics.py --log_dir "./logs/glue-20230907_124541"
+Task    Metric            Value (%)    Baseline (%)  Difference (%)
+------  --------------  -----------  --------------  ----------------
+CoLA    Matthews_corr         13.36            52.1  -38.74
+SST-2   Accuracy              91.97            93.5  -1.53
+MRPC    Accuracy              68.38                  N/A
+MRPC    F1                    81.22            88.9  -7.68
+STS-B   Pearson_corr          65.33            85.8  -20.47
+STS-B   Spearman_corr         67.15                  N/A
+QQP     Accuracy              85.59            71.2  14.39
+QQP     F1                    81.33                  N/A
+MNLI    Matched_acc           82.72            84.6  -1.88
+MNLI    Mismatched_acc        83.54            83.4  0.14
+QNLI    Accuracy                               90.5  N/A
+```
+
+
 `/home/xiaofeng.wu/prjs/ckpts/bert-base-uncased/checkpoint-2528000`
 
-todo
 
 ```
 (py311) xiaofeng.wu@Fairfax4way05RTX4090:/home/xiaofeng.wu/prjs/transformers/examples/pytorch/language-modeling$ python collect_metrics.py --log_dir "./logs/glue-20230902_110318"
