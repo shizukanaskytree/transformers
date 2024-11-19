@@ -7,7 +7,7 @@ class MultiSpike4(nn.Module):
         @staticmethod
         def forward(ctx, input):
             ctx.save_for_backward(input)
-            tmp = torch.clamp(input, min=0, max=4)
+            tmp = torch.clamp(input, min=0, max=8)
 
             """
             If i use `spikes = torch.round(tmp)`, attn layer will produce all 0s
@@ -24,7 +24,7 @@ class MultiSpike4(nn.Module):
             grad_input = grad_output.clone()
             # print("grad_input:",grad_input)
             grad_input[input < 0] = 0
-            grad_input[input > 4] = 0
+            grad_input[input > 8] = 0
             return grad_input
 
     def forward(self, x):
