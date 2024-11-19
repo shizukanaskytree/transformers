@@ -52,7 +52,8 @@ from transformers.testing_utils import CaptureLogger
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
-
+from transformers import TrainerCallback
+from torch.utils.tensorboard import SummaryWriter
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.47.0.dev0")
@@ -233,6 +234,27 @@ class DataTrainingArguments:
             if self.validation_file is not None:
                 extension = self.validation_file.split(".")[-1]
                 assert extension in ["csv", "json", "txt"], "`validation_file` should be a csv, a json or a txt file."
+
+
+class TensorBoardWeightsGradientsCallback(TrainerCallback):
+    def __init__(self, logging_dir):
+        self.writer = SummaryWriter(logging_dir)
+
+    def on_step_end(self, args, state, control, **kwargs):
+        # Get model from the `Trainer`
+        model = kwargs["model"]
+        step = state.global_step
+
+        # Log weights and gradients
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                self.writer.add_histogram(f"weights/{name}", param.data, global_step=step)
+                if param.grad is not None:
+                    self.writer.add_histogram(f"gradients/{name}", param.grad, global_step=step)
+
+    def on_train_end(self, args, state, control, **kwargs):
+        # Close the writer at the end of training
+        self.writer.close()
 
 
 def main():
@@ -580,6 +602,12 @@ def main():
             preds = preds[:, :-1].reshape(-1)
             return metric.compute(predictions=preds, references=labels)
 
+    ### tfboard setting
+    training_args.report_to = ["tensorboard"] # ["wandb"]
+    training_args.logging_dir = "./tfbd_logs"
+    training_args.logging_steps = 1 # how often to log to W&B
+    training_args.save_total_limit = 2 # Limit total checkpoints
+
     # Initialize our Trainer
     trainer = Trainer(
         model=model,
@@ -593,6 +621,7 @@ def main():
         preprocess_logits_for_metrics=preprocess_logits_for_metrics
         if training_args.do_eval and not is_torch_xla_available()
         else None,
+        callbacks=[TensorBoardWeightsGradientsCallback(training_args.logging_dir)], # Add custom callback
     )
 
     # Training
@@ -654,5 +683,5 @@ def _mp_fn(index):
 
 
 if __name__ == "__main__":
-    # import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); # debugpy.breakpoint()
+    import debugpy; debugpy.listen(5678); debugpy.wait_for_client(); # debugpy.breakpoint()
     main()

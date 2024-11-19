@@ -9,5 +9,6 @@ python run_clm.py \
     --per_device_train_batch_size 4 \
     --per_device_eval_batch_size 4 \
     --do_eval \
-    --output_dir /tmp/test-clm-wo-finetuning
+    --output_dir /tmp/test-clm-wo-finetuning --overwrite_output_dir
+
 
